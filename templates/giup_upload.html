@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}파일 업로드 - 기업통계 데이터{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">기업통계 데이터 파일 업로드</h4>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>오류!</strong> {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                    
+                    {% if message %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>성공!</strong> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <h5>파일 업로드 안내</h5>
+                            <p>기업통계 데이터를 분석하기 위한 엑셀 파일을 업로드해주세요.</p>
+                            <ul class="text-muted small">
+                                <li>지원 파일 형식: Excel (.xlsx, .xls)</li>
+                                <li>필수 열: 시도명, 시군구명, 기업규모, 산업대분류명, 기업수, 종사자수</li>
+                                <li>파일명에 날짜(YYYYMM) 형식을 포함해야 합니다. (예: 기업통계_202412.xlsx)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="file" class="form-label">엑셀 파일 선택</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls" required>
+                            <div class="form-text text-muted">파일명에 기준년월(YYYYMM)이 포함되어야 합니다.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-2"></i>업로드
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('pandas.pandas_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>통계 데이터 보기
+                        </a>
+                        <a href="{{ url_for('pandas.pandas_dashboard') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-chart-line me-1"></i>대시보드 보기
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">샘플 파일 구조</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>시도명</th>
+                                    <th>시군구명</th>
+                                    <th>기업규모</th>
+                                    <th>산업대분류명</th>
+                                    <th>기업수</th>
+                                    <th>종사자수</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>서울특별시</td>
+                                    <td>강남구</td>
+                                    <td>대기업</td>
+                                    <td>정보통신업</td>
+                                    <td>150</td>
+                                    <td>15000</td>
+                                </tr>
+                                <tr>
+                                    <td>서울특별시</td>
+                                    <td>강남구</td>
+                                    <td>중견기업</td>
+                                    <td>정보통신업</td>
+                                    <td>300</td>
+                                    <td>9000</td>
+                                </tr>
+                                <tr>
+                                    <td>서울특별시</td>
+                                    <td>강남구</td>
+                                    <td>중소기업</td>
+                                    <td>정보통신업</td>
+                                    <td>800</td>
+                                    <td>8000</td>
+                                </tr>
+                                <tr class="table-secondary">
+                                    <td colspan="6" class="text-center text-muted">...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // 파일 입력 필드 이벤트 핸들러
+    document.getElementById('file').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name;
+        if (fileName) {
+            // YYYYMM 형식의 날짜가 포함되어 있는지 확인
+            const dateMatch = fileName.match(/\d{6}/);
+            if (!dateMatch) {
+                alert('파일명에 기준년월(YYYYMM)이 포함되어야 합니다.\n예: 기업통계_202412.xlsx');
+            }
+        }
+    });
+</script>
+{% endblock %}

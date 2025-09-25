@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(start http://localhost:5000/1_giup/routes/dash11)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

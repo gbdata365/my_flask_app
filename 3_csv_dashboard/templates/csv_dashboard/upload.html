@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV 데이터 시각화 대시보드</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            padding: 50px 0;
+        }
+        .upload-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        .upload-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        .upload-zone:hover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.1);
+            transform: translateY(-2px);
+        }
+        .upload-zone.dragover {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .upload-text {
+            font-size: 1.2rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        .file-input {
+            display: none;
+        }
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .file-list-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .file-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        .file-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .analyze-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            color: white;
+            font-weight: 500;
+        }
+        .delete-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: white;
+        }
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .sample-download {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        .sample-download:hover {
+            color: white;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container main-container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h1 class="text-white display-4 fw-bold mb-3">
+                    <i class="bi bi-graph-up"></i> CSV 데이터 시각화 대시보드
+                </h1>
+                <p class="text-white-50 lead">CSV 파일을 업로드하여 자동으로 시계열 차트와 지역별 분석을 생성하세요</p>
+            </div>
+        </div>
+
+        <!-- 플래시 메시지 -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        {% for message in messages %}
+                            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                                <i class="bi bi-info-circle me-2"></i>{{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <!-- 업로드 섹션 -->
+            <div class="col-lg-8">
+                <div class="upload-card">
+                    <h3 class="mb-4"><i class="bi bi-cloud-upload me-2"></i>CSV 파일 업로드</h3>
+                    <form action="{{ url_for('dashboard.upload_file') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="upload-zone" id="uploadZone">
+                            <i class="bi bi-cloud-upload upload-icon"></i>
+                            <div class="upload-text">
+                                파일을 드래그 앤 드롭하거나 클릭하여 선택하세요
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">지원 형식: CSV, Excel (.xlsx, .xls)</small>
+                            </div>
+                            <input type="file" name="file" class="file-input" id="fileInput" accept=".csv,.xlsx,.xls">
+                            <button type="button" class="btn upload-btn" onclick="document.getElementById('fileInput').click()">
+                                <i class="bi bi-folder2-open me-2"></i>파일 선택
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn upload-btn btn-lg" id="submitBtn" style="display: none;">
+                                <i class="bi bi-upload me-2"></i>업로드 및 분석 시작
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- 샘플 데이터 다운로드 -->
+                    <div class="text-center mt-4">
+                        <small class="text-muted d-block mb-2">샘플 데이터로 테스트해보세요:</small>
+                        <a href="{{ url_for('static', filename='3_csv_dashboard/data/sample_sales_data.csv') }}" class="sample-download me-2" download>
+                            <i class="bi bi-download me-1"></i>매출 데이터
+                        </a>
+                        <a href="{{ url_for('static', filename='3_csv_dashboard/data/sample_population_data.csv') }}" class="sample-download me-2" download>
+                            <i class="bi bi-download me-1"></i>인구 데이터
+                        </a>
+                        <a href="{{ url_for('static', filename='3_csv_dashboard/data/sample_economic_data.csv') }}" class="sample-download" download>
+                            <i class="bi bi-download me-1"></i>경제 데이터
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 기능 소개 -->
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card">
+                            <i class="bi bi-graph-up-arrow feature-icon text-primary"></i>
+                            <h5>자동 시계열 분석</h5>
+                            <p class="text-muted">날짜/시간 컬럼을 자동 감지하여 시계열 차트를 생성합니다.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card">
+                            <i class="bi bi-geo-alt feature-icon text-success"></i>
+                            <h5>지역별 분석</h5>
+                            <p class="text-muted">지역 데이터를 감지하여 지역별 분포 차트를 자동 생성합니다.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="feature-card">
+                            <i class="bi bi-bar-chart feature-icon text-warning"></i>
+                            <h5>통계 분석</h5>
+                            <p class="text-muted">기본 통계와 분포 차트를 자동으로 생성하여 데이터를 요약합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 파일 목록 섹션 -->
+            <div class="col-lg-4">
+                <div class="file-list-card">
+                    <h4 class="mb-4"><i class="bi bi-files me-2"></i>업로드된 파일</h4>
+                    
+                    {% if uploaded_files %}
+                        {% for file in uploaded_files %}
+                            <div class="file-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="bi bi-file-earmark-spreadsheet me-1 text-success"></i>
+                                            {{ file.name }}
+                                        </h6>
+                                        <small class="text-muted">
+                                            {{ file.size }} • {{ file.modified }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <a href="{{ url_for('dashboard.analyze', filename=file.name) }}" 
+                                       class="btn analyze-btn btn-sm me-2">
+                                        <i class="bi bi-graph-up me-1"></i>분석
+                                    </a>
+                                    <form method="post" action="{{ url_for('dashboard.delete_file', filename=file.name) }}" 
+                                          class="d-inline" onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                                        <button type="submit" class="btn delete-btn btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-3">업로드된 파일이 없습니다</p>
+                            <small>샘플 파일을 다운로드하여 테스트해보세요</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 드래그 앤 드롭 기능
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // 드래그 오버 이벤트
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        // 드롭 이벤트
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateUploadUI();
+            }
+        });
+
+        // 클릭으로 파일 선택
+        uploadZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // 파일 선택 시 UI 업데이트
+        fileInput.addEventListener('change', updateUploadUI);
+
+        function updateUploadUI() {
+            const file = fileInput.files[0];
+            if (file) {
+                const uploadText = uploadZone.querySelector('.upload-text');
+                uploadText.innerHTML = `선택된 파일: <strong>${file.name}</strong><br><small>${(file.size / 1024).toFixed(1)} KB</small>`;
+                submitBtn.style.display = 'inline-block';
+            }
+        }
+
+        // 폼 제출 시 로딩 상태
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>업로드 중...';
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

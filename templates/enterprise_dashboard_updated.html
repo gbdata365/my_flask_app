@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/enterprise_dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">기업통계등록부 분석 대시보드</h1>
+    
+    <!-- 데이터 로드 정보 -->
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>데이터 로드 완료!</strong> 
+        {{ data_source }}에서 데이터를 불러왔습니다. (소요시간: {{ load_time|round(2) }}초)
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    
+    <!-- 전체 요약 카드 -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary summary-card">
+                <div class="card-body">
+                    <h5 class="card-title">전체 기업수</h5>
+                    <h2 class="card-text">{{ "{:,}".format(total_companies) }}개</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success summary-card">
+                <div class="card-body">
+                    <h5 class="card-title">전체 종업원수</h5>
+                    <h2 class="card-text">{{ "{:,}".format(total_employees) }}명</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info summary-card">
+                <div class="card-body">
+                    <h5 class="card-title">전체 매출액</h5>
+                    <h2 class="card-text">{{ "{:,}".format(total_revenue_billion) }}억원</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 데이터 캐시 관리 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card cache-info-card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-database"></i> 데이터 캐시 정보
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>원본 파일:</strong> 기업통계등록부.xlsx
+                                {% if excel_exists %}
+                                    ({{ excel_size }} MB)
+                                {% else %}
+                                    (없음)
+                                {% endif %}
+                            </p>
+                            <p class="mb-1">
+                                <strong>캐시 파일:</strong> 기업통계등록부.pickle
+                                {% if pickle_exists %}
+                                    ({{ pickle_size }} MB)
+                                {% else %}
+                                    (없음)
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1">
+                                <strong>마지막 업데이트:</strong> {{ last_update }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>데이터 건수:</strong> {{ "{:,}".format(data_count) }}행
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <button class="btn btn-warning btn-sm" id="cacheReloadBtn">
+                        <i class="fas fa-sync"></i> 캐시 재생성
+                    </button>
+                    <small class="text-muted ml-2">
+                        * 엑셀 파일이 업데이트되면 자동으로 재처리됩니다.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 시도별 전체 현황 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3>시도별 전체 현황</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>시도</th>
+                            <th class="text-right">기업수</th>
+                            <th class="text-right">종업원수</th>
+                            <th class="text-right">매출액(억원)</th>
+                            <th class="text-right">평균 종업원수</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in summary_by_region %}
+                        <tr>
+                            <td>{{ row.region }}</td>
+                            <td class="text-right">{{ "{:,}".format(row.company_count|int) }}</td>
+                            <td class="text-right">{{ "{:,}".format(row.employee_count|int) }}</td>
+                            <td class="text-right">{{ "{:,}".format(row.revenue_billion|int) }}</td>
+                            <td class="text-right">{{ "{:,}".format(row.avg_employees|int) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 그래프들 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div id="company-chart"></div>
+        </div>
+        <div class="col-md-6">
+            <div id="employee-chart"></div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div id="revenue-pie-chart"></div>
+        </div>
+    </div>
+    
+    <!-- 분석 보고서 다운로드 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5>분석 보고서</h5>
+                <p>이 대시보드의 상세한 분석 내용과 활용 방안을 담은 보고서를 다운로드할 수 있습니다.</p>
+                <a href="/01_giup/md/기업통계등록부_분석보고서.md" class="btn btn-primary" download>
+                    <i class="fas fa-download"></i> 분석 보고서 다운로드 (Markdown)
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 시도별 상세 분석 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3>시도별 상세 분석</h3>
+            <div class="form-group">
+                <label for="regionSelect">시도 선택:</label>
+                <select class="form-control" id="regionSelect" onchange="updateRegionDetail()">
+                    <option value="">시도를 선택하세요</option>
+                    {% for region in regions %}
+                    <option value="{{ region }}">{{ region }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div id="regionDetail" class="mt-4" style="display:none;">
+                <!-- 시도별 상세 내용이 여기에 동적으로 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 외부 라이브러리 -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<!-- 차트 데이터 -->
+<script>
+    // Plotly 그래프 데이터
+    var companyData = {{ company_chart_data|safe }};
+    var employeeData = {{ employee_chart_data|safe }};
+    var revenueData = {{ revenue_chart_data|safe }};
+    
+    // 시도별 상세 데이터
+    var regionData = {{ region_data|safe }};
+</script>
+
+<!-- 커스텀 JavaScript -->
+<script src="{{ url_for('static', filename='js/enterprise_dashboard.js') }}"></script>
+{% endblock %}

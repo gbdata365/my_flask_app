@@ -1,0 +1,88 @@
+{% extends "base.html" %}  <!-- 기본 레이아웃 상속 가능 -->
+
+{% block content %}
+<div class="container">
+    <h1>{{ title }}</h1>
+    <p>이것은 동적으로 렌더링되는 HTML 페이지입니다.</p>
+    
+    {% if menu_items %}
+    <h2>메뉴 목록</h2>
+    <ul>
+        {% for item in menu_items %}
+        <li>{{ item.name }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+<div class="container">
+    <h1>{{ title }}</h1>
+    <p>이것은 동적으로 렌더링되는 HTML 페이지입니다.</p>
+    
+    <h2>메뉴 목록</h2>
+    <table class="table table-striped table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>메뉴 이름</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for index, item in sorted_menu_items %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="container">
+    <h2 class="bg-primary text-white p-2 rounded mb-4">메뉴 목록</h2>
+    
+    <table class="table table-bordered table-striped table-hover" style="border: 2px solid #dee2e6;">
+        <thead class="table-dark">
+            <tr>
+                {% for _ in range(columns) %}
+                <th class="text-center" style="border-right: 2px solid #6c757d;">번호</th>
+                <th class="text-center">메뉴 이름</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(0, (sorted_menu_items|length + columns - 1) // columns) %}
+            <tr>
+                {% for j in range(columns) %}
+                    {% set index = i * columns + j %}
+                    {% if index < sorted_menu_items|length %}
+                        <td class="text-center" style="border-right: 2px solid #e6dee1;">{{ sorted_menu_items[index][0] }}</td>
+                        <td class="text-center">{{ sorted_menu_items[index][1].name }}</td>
+                    {% else %}
+                        <td colspan="2" class="text-center bg-light"></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="container-fluid">
+    <h1 class="bg-primary text-white p-3 rounded">{{ title }}</h1>
+    <p>이것은 동적으로 렌더링되는 HTML 페이지입니다.</p>
+    
+    <h2>메뉴 목록</h2>
+    <div class="row row-cols-custom">
+        {% for item in sorted_menu_items %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ loop.index }}. {{ item[1].name }}</h5>
+                    <a href="{{ item[1].url }}" class="btn btn-primary">이동</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
