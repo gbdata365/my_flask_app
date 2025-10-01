@@ -9,6 +9,11 @@ from pathlib import Path
 import re
 import sys
 import importlib.util
+import os
+from dotenv import load_dotenv
+
+# 환경변수 로드
+load_dotenv()
 
 # 프로젝트 모듈 임포트
 from module.menu_generator import MenuGenerator

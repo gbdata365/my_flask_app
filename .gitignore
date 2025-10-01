@@ -1,0 +1,41 @@
+# 환경변수 파일 (민감한 정보 포함)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Claude Code
+.claude/settings.local.json
+
+# 로그 파일
+*.log
+
+# 데이터베이스
+*.db
+*.sqlite
+*.sqlite3
+
+# 이미지 파일 (스크린샷)
+*.jpg
+*.jpeg
+*.png
+*.gif
+
+# Excel 임시 파일
+~$*.xlsx
+~$*.xls
