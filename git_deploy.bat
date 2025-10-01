@@ -98,10 +98,20 @@ echo    - Build Command: 없음 (빈칸으로 둠)
 echo    - Start Command: python main_app.py
 echo    - Port: 5000
 echo 7. 환경변수 설정 (필요시):
-echo    - DB_HOST: 데이터베이스 호스트
-echo    - DB_USER: 데이터베이스 사용자명
-echo    - DB_PASS: 데이터베이스 비밀번호
-echo    - DB_NAME: 데이터베이스 이름
+echo    PostgreSQL (필수):
+echo    - DATABASE_URL: PostgreSQL 연결 문자열
+echo      또는
+echo    - POSTGRES_HOST: PostgreSQL 호스트 (예: postgresql)
+echo    - POSTGRES_PORT: PostgreSQL 포트 (예: 5432)
+echo    - POSTGRES_DB: 데이터베이스 이름 (예: postgres)
+echo    - POSTGRES_USER: 사용자명
+echo    - POSTGRES_PASSWORD: 비밀번호
+echo.
+echo    MySQL (선택):
+echo    - DB_HOST: MySQL 호스트
+echo    - DB_USER: MySQL 사용자명
+echo    - DB_PASS: MySQL 비밀번호
+echo    - DB_NAME: MySQL 데이터베이스 이름
 echo 8. "배포" 버튼 클릭
 echo.
 echo 배포가 완료되면 CloudType에서 제공하는 URL로 접속 가능합니다.
