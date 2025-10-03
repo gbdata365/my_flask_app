@@ -22,6 +22,9 @@ ENV/
 # Claude Code
 .claude/settings.local.json
 
+# Windows 예약어
+nul
+
 # 로그 파일
 *.log
 

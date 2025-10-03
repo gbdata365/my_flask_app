@@ -53,8 +53,8 @@ echo.
 
 REM 모든 파일 스테이징
 echo [4단계] 파일 스테이징...
-git add .
-echo 모든 파일이 스테이징되었습니다.
+git add -A
+git status
 echo.
 
 REM 커밋 메시지 입력
@@ -63,11 +63,28 @@ set /p COMMIT_MSG="커밋 메시지를 입력하세요 (기본값: Update applic
 if "%COMMIT_MSG%"=="" set COMMIT_MSG=Update application
 
 git commit -m "%COMMIT_MSG%"
-echo 커밋이 완료되었습니다.
+if errorlevel 1 (
+    echo 커밋할 변경사항이 없습니다.
+) else (
+    echo 커밋이 완료되었습니다.
+)
+echo.
+
+REM 원격 저장소 동기화
+echo [6단계] 원격 저장소 동기화 중...
+git pull origin main --rebase
+if errorlevel 1 (
+    echo.
+    echo 동기화 실패! 충돌이 발생했을 수 있습니다.
+    echo 수동으로 해결이 필요합니다.
+    echo.
+    pause
+    exit /b 1
+)
 echo.
 
 REM GitHub에 푸시
-echo [6단계] GitHub에 업로드...
+echo [7단계] GitHub에 업로드...
 git push -u origin main
 if errorlevel 1 (
     echo.
