@@ -70,22 +70,10 @@ if errorlevel 1 (
 )
 echo.
 
-REM 원격 저장소 동기화
-echo [6단계] 원격 저장소 동기화 중...
-git pull origin main --rebase
-if errorlevel 1 (
-    echo.
-    echo 동기화 실패! 충돌이 발생했을 수 있습니다.
-    echo 수동으로 해결이 필요합니다.
-    echo.
-    pause
-    exit /b 1
-)
-echo.
-
-REM GitHub에 푸시
-echo [7단계] GitHub에 업로드...
-git push -u origin main
+REM GitHub에 푸시 (force)
+echo [6단계] GitHub에 강제 업로드...
+echo 경고: 원격 저장소를 로컬 상태로 덮어씁니다.
+git push -f origin main
 if errorlevel 1 (
     echo.
     echo ⚠️  푸시 실패! 다음을 확인하세요:

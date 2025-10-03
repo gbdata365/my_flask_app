@@ -280,7 +280,16 @@ def is_complete_html(content):
 # 애플리케이션 실행
 if __name__ == "__main__":
     import os
+    import sys
+
+    # Windows 콘솔 인코딩 설정
+    if sys.platform == 'win32':
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+        except:
+            pass
+
     app = create_app()
-    print("🚀 Flask 애플리케이션 시작")
+    print("[INFO] Flask 애플리케이션 시작")
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)

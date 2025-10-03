@@ -1,0 +1,37 @@
+name: my-flask-app11
+app: python@3.12
+options:
+  ports: "5000"
+  start: python main_app.py
+  healthz: /
+  env:
+    - name: DATABASE_URL
+      value: postgresql://gbdo:rudqnrehc-jd11@postgresql:5432/postgres
+    - name: POSTGRES_DB
+      value: postgres
+    - name: POSTGRES_USER
+      value: gbdo
+    - name: POSTGRES_PASSWORD
+      value: rudqnrehc-jd11
+    - name: POSTGRES_HOST_EXTERNAL
+      value: svc.sel3.cloudtype.app
+    - name: POSTGRES_PORT_EXTERNAL
+      value: "32596"
+    - name: FLASK_ENV
+      value: production
+    - name: SECRET_KEY
+      value: csv_dashboard_secret_key_2024_cloudtype
+    - name: SERVER_HOST
+      value: 0.0.0.0
+    - name: SERVER_PORT
+      value: "5000"
+    - name: LOG_LEVEL
+      value: INFO
+  buildenv: []
+resources:
+  spot: false
+  memory: 0.5
+context:
+  git:
+    url: https://github.com/gbdata365/my_flask_app.git
+    branch: main

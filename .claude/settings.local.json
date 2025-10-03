@@ -42,7 +42,18 @@
       "WebFetch(domain:fonts.googleapis.com)",
       "Bash(pip download:*)",
       "Bash(find:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(del check_excel.py)",
+      "Bash(where psql)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Read(//c/Users/user/Downloads/**)",
+      "Bash(ping:*)",
+      "Bash(Test-NetConnection -ComputerName svc.sel3.cloudtype.app -Port 32596)",
+      "Bash(git rm:*)",
+      "Bash(del nul)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
     "ask": []

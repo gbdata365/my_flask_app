@@ -2,6 +2,7 @@ import pymysql
 import psycopg2
 import psycopg2.extras
 import os
+import socket
 from urllib.parse import urlparse
 
 
@@ -22,32 +23,42 @@ def get_db_connection():
     return pymysql.connect(**get_config())
 
 
-def get_postgres_config():
-    """PostgreSQL 설정 - DATABASE_URL 또는 개별 환경변수 사용"""
-    database_url = os.environ.get("DATABASE_URL")
+def is_cloudtype_environment():
+    """Cloudtype 환경인지 확인 (내부 호스트명 'postgresql' 접근 가능 여부)"""
+    try:
+        socket.gethostbyname('postgresql')
+        return True
+    except socket.gaierror:
+        return False
 
-    if database_url:
-        # DATABASE_URL 파싱 (예: postgresql://user:pass@host:5432/dbname)
-        result = urlparse(database_url)
+
+def get_postgres_config():
+    """PostgreSQL 설정 - 환경에 따라 자동 선택"""
+    # Cloudtype 내부 환경인지 확인
+    is_cloudtype = is_cloudtype_environment()
+
+    if is_cloudtype:
+        # Cloudtype 내부: 내부 호스트명 사용
         return {
-            "host": result.hostname,
-            "port": result.port or 5432,
-            "database": result.path[1:],  # 앞의 '/' 제거
-            "user": result.username,
-            "password": result.password,
+            "host": "postgresql",
+            "port": 5432,
+            "database": os.environ.get("POSTGRES_DB", "postgres"),
+            "user": os.environ.get("POSTGRES_USER", "gbdo"),
+            "password": os.environ.get("POSTGRES_PASSWORD", "rudqnrehc-jd11"),
         }
     else:
-        # 개별 환경변수 사용
+        # 로컬 환경: 외부 접속 정보 사용
         return {
-            "host": os.environ.get("POSTGRES_HOST", "localhost"),
-            "port": int(os.environ.get("POSTGRES_PORT", "5432")),
+            "host": os.environ.get("POSTGRES_HOST_EXTERNAL", "svc.sel3.cloudtype.app"),
+            "port": int(os.environ.get("POSTGRES_PORT_EXTERNAL", "32596")),
             "database": os.environ.get("POSTGRES_DB", "postgres"),
-            "user": os.environ.get("POSTGRES_USER", "postgres"),
-            "password": os.environ.get("POSTGRES_PASSWORD", ""),
+            "user": os.environ.get("POSTGRES_USER", "gbdo"),
+            "password": os.environ.get("POSTGRES_PASSWORD", "rudqnrehc-jd11"),
         }
 
 
 def get_postgres_connection():
+    
     """PostgreSQL 연결 (딕셔너리 커서 사용)"""
     config = get_postgres_config()
     return psycopg2.connect(

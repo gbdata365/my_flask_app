@@ -1,0 +1,24 @@
+name: flask-dashboard
+runtime: python
+buildCommand: pip install -r requirements.txt
+startCommand: python main_app.py
+
+env:
+  - name: DATABASE_URL
+    value: postgresql://gbdo:rudqnrehc-jd11@postgresql:5432/postgres
+  - name: POSTGRES_DB
+    value: postgres
+  - name: POSTGRES_USER
+    value: gbdo
+  - name: POSTGRES_PASSWORD
+    value: rudqnrehc-jd11
+  - name: FLASK_ENV
+    value: production
+  - name: SECRET_KEY
+    value: csv_dashboard_secret_key_2024_docker
+  - name: SERVER_HOST
+    value: 0.0.0.0
+  - name: SERVER_PORT
+    value: "5000"
+  - name: LOG_LEVEL
+    value: INFO
