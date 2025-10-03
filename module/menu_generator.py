@@ -82,15 +82,23 @@ class MenuGenerator:
         # routes 폴더의 .py 파일들 처리
         routes_dir = giup_base / "routes"
         if routes_dir.exists():
-            for py_file in sorted(routes_dir.glob("*.py")):
+            py_files = sorted(routes_dir.glob("*.py"))
+            print(f"[DEBUG] routes_dir: {routes_dir}")
+            print(f"[DEBUG] routes_dir.exists(): {routes_dir.exists()}")
+            print(f"[DEBUG] Found .py files: {[f.name for f in py_files]}")
+
+            for py_file in py_files:
                 # __init__.py와 _로 시작하는 파일들은 제외
                 if py_file.name != "__init__.py" and not py_file.name.startswith("_"):
                     display_name = py_file.stem.replace('_', ' ')
+                    print(f"[DEBUG] Adding menu item: {display_name} -> {py_file.stem}")
                     menu_items.append({
                         'name': display_name,
                         'url': f'/1_giup/routes/{py_file.stem}',
                         'type': 'python'
                     })
+                else:
+                    print(f"[DEBUG] Skipping file: {py_file.name}")
 
         return menu_items
 
