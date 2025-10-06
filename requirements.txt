@@ -17,3 +17,4 @@ six==1.16.0
 numpy==1.26.4
 tenacity==8.2.3
 packaging==23.2
+markdown==3.5.1
