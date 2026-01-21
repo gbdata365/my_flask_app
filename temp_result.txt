@@ -1,0 +1,994 @@
+=== TABLES ===
+                         table_name table_type
+          cache_sigungu_age_summary BASE TABLE
+           cache_sigungu_indicators BASE TABLE
+                 code_age_attribute BASE TABLE
+                     code_age_group BASE TABLE
+                     dim_admin_area BASE TABLE
+          fact_population_age_group BASE TABLE
+fact_population_age_group_2022_2024 BASE TABLE
+fact_population_age_group_2025_2027 BASE TABLE
+fact_population_age_group_2028_2030 BASE TABLE
+              fact_population_basic BASE TABLE
+             fact_population_by_age BASE TABLE
+              fact_single_household BASE TABLE
+                         gb_address BASE TABLE
+                      gb_population BASE TABLE
+                           giup_cal BASE TABLE
+                    giup_cal_backup BASE TABLE
+                          m_giuphap BASE TABLE
+                            m_merge BASE TABLE
+        v_cities_with_sub_districts       VIEW
+               v_parent_sigungu_map       VIEW
+                v_sigungu_age_group       VIEW
+               v_sigungu_population       VIEW
+          v_sigungu_population_rank       VIEW
+          v_sub_district_population       VIEW
+
+
+### cache_sigungu_age_summary
+   column_name                   data_type is_nullable
+       base_ym                        date          NO
+       sido_nm           character varying         YES
+  sigungu_code           character varying          NO
+    sigungu_nm           character varying         YES
+  age_category                    smallint          NO
+age_group_name           character varying          NO
+    sort_order                     integer         YES
+     age_start                     integer         YES
+       age_end                     integer         YES
+      male_pop                     integer         YES
+    female_pop                     integer         YES
+     total_pop                     integer         YES
+   male_single                     integer         YES
+ female_single                     integer         YES
+  total_single                     integer         YES
+  single_ratio                     numeric         YES
+    created_at timestamp without time zone         YES
+
+### cache_sigungu_indicators
+         column_name                   data_type is_nullable
+             base_ym                        date          NO
+             sido_nm           character varying         YES
+        sigungu_code           character varying          NO
+          sigungu_nm           character varying         YES
+           total_pop                     integer         YES
+            male_pop                     integer         YES
+          female_pop                     integer         YES
+       household_cnt                     integer         YES
+single_household_cnt                     integer         YES
+           youth_pop                     integer         YES
+         working_pop                     integer         YES
+         elderly_pop                     integer         YES
+       elderly_ratio                     numeric         YES
+         youth_ratio                     numeric         YES
+       working_ratio                     numeric         YES
+        single_ratio                     numeric         YES
+         aging_index                     numeric         YES
+       pop_per_house                     numeric         YES
+           sex_ratio                     numeric         YES
+          created_at timestamp without time zone         YES
+
+### code_age_attribute
+column_name         data_type is_nullable
+         id           integer          NO
+       code character varying          NO
+  code_name character varying          NO
+  age_start           integer          NO
+    age_end           integer          NO
+ sort_order           integer          NO
+
+### code_age_group
+  column_name         data_type is_nullable
+           id           integer          NO
+         code character varying          NO
+    code_name character varying          NO
+    age_start           integer          NO
+      age_end           integer          NO
+   sort_order           integer          NO
+     category          smallint         YES
+category_name character varying         YES
+
+### dim_admin_area
+    column_name                   data_type is_nullable
+     admin_code           character varying          NO
+      sido_code           character varying          NO
+   sigungu_code           character varying          NO
+        sido_nm           character varying          NO
+     sigungu_nm           character varying         YES
+eupmyeondong_nm           character varying         YES
+      region_nm           character varying         YES
+    region_code                    smallint         YES
+ admin_cls_code           character varying         YES
+legal_dong_code           character varying         YES
+  revision_date                        date         YES
+     created_at timestamp without time zone         YES
+     updated_at timestamp without time zone         YES
+
+### fact_population_age_group
+    column_name                   data_type is_nullable
+             id                     integer          NO
+     admin_code           character varying          NO
+        base_ym                        date          NO
+      total_pop                     integer         YES
+       male_pop                     integer         YES
+     female_pop                     integer         YES
+       male_0_9                     integer         YES
+     male_10_19                     integer         YES
+     male_20_29                     integer         YES
+     male_30_39                     integer         YES
+     male_40_49                     integer         YES
+     male_50_59                     integer         YES
+     male_60_69                     integer         YES
+     male_70_79                     integer         YES
+     male_80_89                     integer         YES
+     male_90_99                     integer         YES
+  male_100_over                     integer         YES
+     female_0_9                     integer         YES
+   female_10_19                     integer         YES
+   female_20_29                     integer         YES
+   female_30_39                     integer         YES
+   female_40_49                     integer         YES
+   female_50_59                     integer         YES
+   female_60_69                     integer         YES
+   female_70_79                     integer         YES
+   female_80_89                     integer         YES
+   female_90_99                     integer         YES
+female_100_over                     integer         YES
+     created_at timestamp without time zone         YES
+
+### fact_population_age_group_2022_2024
+    column_name                   data_type is_nullable
+             id                     integer          NO
+     admin_code           character varying          NO
+        base_ym                        date          NO
+      total_pop                     integer         YES
+       male_pop                     integer         YES
+     female_pop                     integer         YES
+       male_0_9                     integer         YES
+     male_10_19                     integer         YES
+     male_20_29                     integer         YES
+     male_30_39                     integer         YES
+     male_40_49                     integer         YES
+     male_50_59                     integer         YES
+     male_60_69                     integer         YES
+     male_70_79                     integer         YES
+     male_80_89                     integer         YES
+     male_90_99                     integer         YES
+  male_100_over                     integer         YES
+     female_0_9                     integer         YES
+   female_10_19                     integer         YES
+   female_20_29                     integer         YES
+   female_30_39                     integer         YES
+   female_40_49                     integer         YES
+   female_50_59                     integer         YES
+   female_60_69                     integer         YES
+   female_70_79                     integer         YES
+   female_80_89                     integer         YES
+   female_90_99                     integer         YES
+female_100_over                     integer         YES
+     created_at timestamp without time zone         YES
+
+### fact_population_age_group_2025_2027
+    column_name                   data_type is_nullable
+             id                     integer          NO
+     admin_code           character varying          NO
+        base_ym                        date          NO
+      total_pop                     integer         YES
+       male_pop                     integer         YES
+     female_pop                     integer         YES
+       male_0_9                     integer         YES
+     male_10_19                     integer         YES
+     male_20_29                     integer         YES
+     male_30_39                     integer         YES
+     male_40_49                     integer         YES
+     male_50_59                     integer         YES
+     male_60_69                     integer         YES
+     male_70_79                     integer         YES
+     male_80_89                     integer         YES
+     male_90_99                     integer         YES
+  male_100_over                     integer         YES
+     female_0_9                     integer         YES
+   female_10_19                     integer         YES
+   female_20_29                     integer         YES
+   female_30_39                     integer         YES
+   female_40_49                     integer         YES
+   female_50_59                     integer         YES
+   female_60_69                     integer         YES
+   female_70_79                     integer         YES
+   female_80_89                     integer         YES
+   female_90_99                     integer         YES
+female_100_over                     integer         YES
+     created_at timestamp without time zone         YES
+
+### fact_population_age_group_2028_2030
+    column_name                   data_type is_nullable
+             id                     integer          NO
+     admin_code           character varying          NO
+        base_ym                        date          NO
+      total_pop                     integer         YES
+       male_pop                     integer         YES
+     female_pop                     integer         YES
+       male_0_9                     integer         YES
+     male_10_19                     integer         YES
+     male_20_29                     integer         YES
+     male_30_39                     integer         YES
+     male_40_49                     integer         YES
+     male_50_59                     integer         YES
+     male_60_69                     integer         YES
+     male_70_79                     integer         YES
+     male_80_89                     integer         YES
+     male_90_99                     integer         YES
+  male_100_over                     integer         YES
+     female_0_9                     integer         YES
+   female_10_19                     integer         YES
+   female_20_29                     integer         YES
+   female_30_39                     integer         YES
+   female_40_49                     integer         YES
+   female_50_59                     integer         YES
+   female_60_69                     integer         YES
+   female_70_79                     integer         YES
+   female_80_89                     integer         YES
+   female_90_99                     integer         YES
+female_100_over                     integer         YES
+     created_at timestamp without time zone         YES
+
+### fact_population_basic
+  column_name                   data_type is_nullable
+   admin_code           character varying          NO
+      base_ym                        date          NO
+household_cnt                     integer         YES
+    total_pop                     integer         YES
+     male_pop                     integer         YES
+   female_pop                     integer         YES
+    sex_ratio                     numeric         YES
+pop_per_house                     numeric         YES
+         tong           character varying         YES
+          ban           character varying         YES
+   created_at timestamp without time zone         YES
+
+### fact_population_by_age
+        column_name                   data_type is_nullable
+         admin_code           character varying          NO
+            base_ym                        date          NO
+          total_pop                     integer         YES
+         male_total                     integer         YES
+       female_total                     integer         YES
+         male_age_0                     integer         YES
+       female_age_0                     integer         YES
+         male_age_1                     integer         YES
+       female_age_1                     integer         YES
+         male_age_2                     integer         YES
+       female_age_2                     integer         YES
+         male_age_3                     integer         YES
+       female_age_3                     integer         YES
+         male_age_4                     integer         YES
+       female_age_4                     integer         YES
+         male_age_5                     integer         YES
+       female_age_5                     integer         YES
+         male_age_6                     integer         YES
+       female_age_6                     integer         YES
+         male_age_7                     integer         YES
+       female_age_7                     integer         YES
+         male_age_8                     integer         YES
+       female_age_8                     integer         YES
+         male_age_9                     integer         YES
+       female_age_9                     integer         YES
+        male_age_10                     integer         YES
+      female_age_10                     integer         YES
+        male_age_11                     integer         YES
+      female_age_11                     integer         YES
+        male_age_12                     integer         YES
+      female_age_12                     integer         YES
+        male_age_13                     integer         YES
+      female_age_13                     integer         YES
+        male_age_14                     integer         YES
+      female_age_14                     integer         YES
+        male_age_15                     integer         YES
+      female_age_15                     integer         YES
+        male_age_16                     integer         YES
+      female_age_16                     integer         YES
+        male_age_17                     integer         YES
+      female_age_17                     integer         YES
+        male_age_18                     integer         YES
+      female_age_18                     integer         YES
+        male_age_19                     integer         YES
+      female_age_19                     integer         YES
+        male_age_20                     integer         YES
+      female_age_20                     integer         YES
+        male_age_21                     integer         YES
+      female_age_21                     integer         YES
+        male_age_22                     integer         YES
+      female_age_22                     integer         YES
+        male_age_23                     integer         YES
+      female_age_23                     integer         YES
+        male_age_24                     integer         YES
+      female_age_24                     integer         YES
+        male_age_25                     integer         YES
+      female_age_25                     integer         YES
+        male_age_26                     integer         YES
+      female_age_26                     integer         YES
+        male_age_27                     integer         YES
+      female_age_27                     integer         YES
+        male_age_28                     integer         YES
+      female_age_28                     integer         YES
+        male_age_29                     integer         YES
+      female_age_29                     integer         YES
+        male_age_30                     integer         YES
+      female_age_30                     integer         YES
+        male_age_31                     integer         YES
+      female_age_31                     integer         YES
+        male_age_32                     integer         YES
+      female_age_32                     integer         YES
+        male_age_33                     integer         YES
+      female_age_33                     integer         YES
+        male_age_34                     integer         YES
+      female_age_34                     integer         YES
+        male_age_35                     integer         YES
+      female_age_35                     integer         YES
+        male_age_36                     integer         YES
+      female_age_36                     integer         YES
+        male_age_37                     integer         YES
+      female_age_37                     integer         YES
+        male_age_38                     integer         YES
+      female_age_38                     integer         YES
+        male_age_39                     integer         YES
+      female_age_39                     integer         YES
+        male_age_40                     integer         YES
+      female_age_40                     integer         YES
+        male_age_41                     integer         YES
+      female_age_41                     integer         YES
+        male_age_42                     integer         YES
+      female_age_42                     integer         YES
+        male_age_43                     integer         YES
+      female_age_43                     integer         YES
+        male_age_44                     integer         YES
+      female_age_44                     integer         YES
+        male_age_45                     integer         YES
+      female_age_45                     integer         YES
+        male_age_46                     integer         YES
+      female_age_46                     integer         YES
+        male_age_47                     integer         YES
+      female_age_47                     integer         YES
+        male_age_48                     integer         YES
+      female_age_48                     integer         YES
+        male_age_49                     integer         YES
+      female_age_49                     integer         YES
+        male_age_50                     integer         YES
+      female_age_50                     integer         YES
+        male_age_51                     integer         YES
+      female_age_51                     integer         YES
+        male_age_52                     integer         YES
+      female_age_52                     integer         YES
+        male_age_53                     integer         YES
+      female_age_53                     integer         YES
+        male_age_54                     integer         YES
+      female_age_54                     integer         YES
+        male_age_55                     integer         YES
+      female_age_55                     integer         YES
+        male_age_56                     integer         YES
+      female_age_56                     integer         YES
+        male_age_57                     integer         YES
+      female_age_57                     integer         YES
+        male_age_58                     integer         YES
+      female_age_58                     integer         YES
+        male_age_59                     integer         YES
+      female_age_59                     integer         YES
+        male_age_60                     integer         YES
+      female_age_60                     integer         YES
+        male_age_61                     integer         YES
+      female_age_61                     integer         YES
+        male_age_62                     integer         YES
+      female_age_62                     integer         YES
+        male_age_63                     integer         YES
+      female_age_63                     integer         YES
+        male_age_64                     integer         YES
+      female_age_64                     integer         YES
+        male_age_65                     integer         YES
+      female_age_65                     integer         YES
+        male_age_66                     integer         YES
+      female_age_66                     integer         YES
+        male_age_67                     integer         YES
+      female_age_67                     integer         YES
+        male_age_68                     integer         YES
+      female_age_68                     integer         YES
+        male_age_69                     integer         YES
+      female_age_69                     integer         YES
+        male_age_70                     integer         YES
+      female_age_70                     integer         YES
+        male_age_71                     integer         YES
+      female_age_71                     integer         YES
+        male_age_72                     integer         YES
+      female_age_72                     integer         YES
+        male_age_73                     integer         YES
+      female_age_73                     integer         YES
+        male_age_74                     integer         YES
+      female_age_74                     integer         YES
+        male_age_75                     integer         YES
+      female_age_75                     integer         YES
+        male_age_76                     integer         YES
+      female_age_76                     integer         YES
+        male_age_77                     integer         YES
+      female_age_77                     integer         YES
+        male_age_78                     integer         YES
+      female_age_78                     integer         YES
+        male_age_79                     integer         YES
+      female_age_79                     integer         YES
+        male_age_80                     integer         YES
+      female_age_80                     integer         YES
+        male_age_81                     integer         YES
+      female_age_81                     integer         YES
+        male_age_82                     integer         YES
+      female_age_82                     integer         YES
+        male_age_83                     integer         YES
+      female_age_83                     integer         YES
+        male_age_84                     integer         YES
+      female_age_84                     integer         YES
+        male_age_85                     integer         YES
+      female_age_85                     integer         YES
+        male_age_86                     integer         YES
+      female_age_86                     integer         YES
+        male_age_87                     integer         YES
+      female_age_87                     integer         YES
+        male_age_88                     integer         YES
+      female_age_88                     integer         YES
+        male_age_89                     integer         YES
+      female_age_89                     integer         YES
+        male_age_90                     integer         YES
+      female_age_90                     integer         YES
+        male_age_91                     integer         YES
+      female_age_91                     integer         YES
+        male_age_92                     integer         YES
+      female_age_92                     integer         YES
+        male_age_93                     integer         YES
+      female_age_93                     integer         YES
+        male_age_94                     integer         YES
+      female_age_94                     integer         YES
+        male_age_95                     integer         YES
+      female_age_95                     integer         YES
+        male_age_96                     integer         YES
+      female_age_96                     integer         YES
+        male_age_97                     integer         YES
+      female_age_97                     integer         YES
+        male_age_98                     integer         YES
+      female_age_98                     integer         YES
+        male_age_99                     integer         YES
+      female_age_99                     integer         YES
+       male_age_100                     integer         YES
+     female_age_100                     integer         YES
+       male_age_101                     integer         YES
+     female_age_101                     integer         YES
+       male_age_102                     integer         YES
+     female_age_102                     integer         YES
+       male_age_103                     integer         YES
+     female_age_103                     integer         YES
+       male_age_104                     integer         YES
+     female_age_104                     integer         YES
+       male_age_105                     integer         YES
+     female_age_105                     integer         YES
+       male_age_106                     integer         YES
+     female_age_106                     integer         YES
+       male_age_107                     integer         YES
+     female_age_107                     integer         YES
+       male_age_108                     integer         YES
+     female_age_108                     integer         YES
+       male_age_109                     integer         YES
+     female_age_109                     integer         YES
+  male_age_110_over                     integer         YES
+female_age_110_over                     integer         YES
+         created_at timestamp without time zone         YES
+
+### fact_single_household
+        column_name                   data_type is_nullable
+         admin_code           character varying          NO
+            base_ym                        date          NO
+          total_cnt                     integer         YES
+         male_total                     integer         YES
+       female_total                     integer         YES
+         male_age_0                     integer         YES
+       female_age_0                     integer         YES
+         male_age_1                     integer         YES
+       female_age_1                     integer         YES
+         male_age_2                     integer         YES
+       female_age_2                     integer         YES
+         male_age_3                     integer         YES
+       female_age_3                     integer         YES
+         male_age_4                     integer         YES
+       female_age_4                     integer         YES
+         male_age_5                     integer         YES
+       female_age_5                     integer         YES
+         male_age_6                     integer         YES
+       female_age_6                     integer         YES
+         male_age_7                     integer         YES
+       female_age_7                     integer         YES
+         male_age_8                     integer         YES
+       female_age_8                     integer         YES
+         male_age_9                     integer         YES
+       female_age_9                     integer         YES
+        male_age_10                     integer         YES
+      female_age_10                     integer         YES
+        male_age_11                     integer         YES
+      female_age_11                     integer         YES
+        male_age_12                     integer         YES
+      female_age_12                     integer         YES
+        male_age_13                     integer         YES
+      female_age_13                     integer         YES
+        male_age_14                     integer         YES
+      female_age_14                     integer         YES
+        male_age_15                     integer         YES
+      female_age_15                     integer         YES
+        male_age_16                     integer         YES
+      female_age_16                     integer         YES
+        male_age_17                     integer         YES
+      female_age_17                     integer         YES
+        male_age_18                     integer         YES
+      female_age_18                     integer         YES
+        male_age_19                     integer         YES
+      female_age_19                     integer         YES
+        male_age_20                     integer         YES
+      female_age_20                     integer         YES
+        male_age_21                     integer         YES
+      female_age_21                     integer         YES
+        male_age_22                     integer         YES
+      female_age_22                     integer         YES
+        male_age_23                     integer         YES
+      female_age_23                     integer         YES
+        male_age_24                     integer         YES
+      female_age_24                     integer         YES
+        male_age_25                     integer         YES
+      female_age_25                     integer         YES
+        male_age_26                     integer         YES
+      female_age_26                     integer         YES
+        male_age_27                     integer         YES
+      female_age_27                     integer         YES
+        male_age_28                     integer         YES
+      female_age_28                     integer         YES
+        male_age_29                     integer         YES
+      female_age_29                     integer         YES
+        male_age_30                     integer         YES
+      female_age_30                     integer         YES
+        male_age_31                     integer         YES
+      female_age_31                     integer         YES
+        male_age_32                     integer         YES
+      female_age_32                     integer         YES
+        male_age_33                     integer         YES
+      female_age_33                     integer         YES
+        male_age_34                     integer         YES
+      female_age_34                     integer         YES
+        male_age_35                     integer         YES
+      female_age_35                     integer         YES
+        male_age_36                     integer         YES
+      female_age_36                     integer         YES
+        male_age_37                     integer         YES
+      female_age_37                     integer         YES
+        male_age_38                     integer         YES
+      female_age_38                     integer         YES
+        male_age_39                     integer         YES
+      female_age_39                     integer         YES
+        male_age_40                     integer         YES
+      female_age_40                     integer         YES
+        male_age_41                     integer         YES
+      female_age_41                     integer         YES
+        male_age_42                     integer         YES
+      female_age_42                     integer         YES
+        male_age_43                     integer         YES
+      female_age_43                     integer         YES
+        male_age_44                     integer         YES
+      female_age_44                     integer         YES
+        male_age_45                     integer         YES
+      female_age_45                     integer         YES
+        male_age_46                     integer         YES
+      female_age_46                     integer         YES
+        male_age_47                     integer         YES
+      female_age_47                     integer         YES
+        male_age_48                     integer         YES
+      female_age_48                     integer         YES
+        male_age_49                     integer         YES
+      female_age_49                     integer         YES
+        male_age_50                     integer         YES
+      female_age_50                     integer         YES
+        male_age_51                     integer         YES
+      female_age_51                     integer         YES
+        male_age_52                     integer         YES
+      female_age_52                     integer         YES
+        male_age_53                     integer         YES
+      female_age_53                     integer         YES
+        male_age_54                     integer         YES
+      female_age_54                     integer         YES
+        male_age_55                     integer         YES
+      female_age_55                     integer         YES
+        male_age_56                     integer         YES
+      female_age_56                     integer         YES
+        male_age_57                     integer         YES
+      female_age_57                     integer         YES
+        male_age_58                     integer         YES
+      female_age_58                     integer         YES
+        male_age_59                     integer         YES
+      female_age_59                     integer         YES
+        male_age_60                     integer         YES
+      female_age_60                     integer         YES
+        male_age_61                     integer         YES
+      female_age_61                     integer         YES
+        male_age_62                     integer         YES
+      female_age_62                     integer         YES
+        male_age_63                     integer         YES
+      female_age_63                     integer         YES
+        male_age_64                     integer         YES
+      female_age_64                     integer         YES
+        male_age_65                     integer         YES
+      female_age_65                     integer         YES
+        male_age_66                     integer         YES
+      female_age_66                     integer         YES
+        male_age_67                     integer         YES
+      female_age_67                     integer         YES
+        male_age_68                     integer         YES
+      female_age_68                     integer         YES
+        male_age_69                     integer         YES
+      female_age_69                     integer         YES
+        male_age_70                     integer         YES
+      female_age_70                     integer         YES
+        male_age_71                     integer         YES
+      female_age_71                     integer         YES
+        male_age_72                     integer         YES
+      female_age_72                     integer         YES
+        male_age_73                     integer         YES
+      female_age_73                     integer         YES
+        male_age_74                     integer         YES
+      female_age_74                     integer         YES
+        male_age_75                     integer         YES
+      female_age_75                     integer         YES
+        male_age_76                     integer         YES
+      female_age_76                     integer         YES
+        male_age_77                     integer         YES
+      female_age_77                     integer         YES
+        male_age_78                     integer         YES
+      female_age_78                     integer         YES
+        male_age_79                     integer         YES
+      female_age_79                     integer         YES
+        male_age_80                     integer         YES
+      female_age_80                     integer         YES
+        male_age_81                     integer         YES
+      female_age_81                     integer         YES
+        male_age_82                     integer         YES
+      female_age_82                     integer         YES
+        male_age_83                     integer         YES
+      female_age_83                     integer         YES
+        male_age_84                     integer         YES
+      female_age_84                     integer         YES
+        male_age_85                     integer         YES
+      female_age_85                     integer         YES
+        male_age_86                     integer         YES
+      female_age_86                     integer         YES
+        male_age_87                     integer         YES
+      female_age_87                     integer         YES
+        male_age_88                     integer         YES
+      female_age_88                     integer         YES
+        male_age_89                     integer         YES
+      female_age_89                     integer         YES
+        male_age_90                     integer         YES
+      female_age_90                     integer         YES
+        male_age_91                     integer         YES
+      female_age_91                     integer         YES
+        male_age_92                     integer         YES
+      female_age_92                     integer         YES
+        male_age_93                     integer         YES
+      female_age_93                     integer         YES
+        male_age_94                     integer         YES
+      female_age_94                     integer         YES
+        male_age_95                     integer         YES
+      female_age_95                     integer         YES
+        male_age_96                     integer         YES
+      female_age_96                     integer         YES
+        male_age_97                     integer         YES
+      female_age_97                     integer         YES
+        male_age_98                     integer         YES
+      female_age_98                     integer         YES
+        male_age_99                     integer         YES
+      female_age_99                     integer         YES
+       male_age_100                     integer         YES
+     female_age_100                     integer         YES
+       male_age_101                     integer         YES
+     female_age_101                     integer         YES
+       male_age_102                     integer         YES
+     female_age_102                     integer         YES
+       male_age_103                     integer         YES
+     female_age_103                     integer         YES
+       male_age_104                     integer         YES
+     female_age_104                     integer         YES
+       male_age_105                     integer         YES
+     female_age_105                     integer         YES
+       male_age_106                     integer         YES
+     female_age_106                     integer         YES
+       male_age_107                     integer         YES
+     female_age_107                     integer         YES
+       male_age_108                     integer         YES
+     female_age_108                     integer         YES
+       male_age_109                     integer         YES
+     female_age_109                     integer         YES
+  male_age_110_over                     integer         YES
+female_age_110_over                     integer         YES
+         created_at timestamp without time zone         YES
+
+### gb_address
+column_name         data_type is_nullable
+         id           integer          NO
+        시도명 character varying         YES
+       시군구명 character varying         YES
+       행정동명 character varying         YES
+       법정동명 character varying         YES
+     행정구역코드            bigint         YES
+      행정동코드            bigint         YES
+      법정동코드            bigint         YES
+       개정일자              date         YES
+       연결번호           integer         YES
+         권역 character varying         YES
+       권역코드           integer         YES
+
+### gb_population
+   column_name                   data_type is_nullable
+            id                     integer          NO
+      stats_ym           character varying          NO
+       admm_cd           character varying          NO
+       ctpv_nm           character varying         YES
+        sgg_nm           character varying         YES
+       dong_nm           character varying         YES
+          tong           character varying         YES
+           ban           character varying         YES
+  tot_nmpr_cnt                     integer         YES
+        hh_cnt                     integer         YES
+       hh_nmpr                     numeric         YES
+ male_nmpr_cnt                     integer         YES
+ feml_nmpr_cnt                     integer         YES
+male_feml_rate                     numeric         YES
+    created_at timestamp without time zone         YES
+    updated_at timestamp without time zone         YES
+
+### giup_cal
+column_name                   data_type is_nullable
+         id                     integer          NO
+       기준년월           character varying         YES
+        시도명           character varying         YES
+       시군구명           character varying         YES
+       지역코드           character varying         YES
+       총인구수                     integer         YES
+        가구수                     integer         YES
+        남자수                     integer         YES
+        여자수                     integer         YES
+       남자비율                     numeric         YES
+       여자비율                     numeric         YES
+      총기업체수                     integer         YES
+     산업분류_9                     integer         YES
+     산업분류_a                     integer         YES
+     산업분류_b                     integer         YES
+     산업분류_c                     integer         YES
+     산업분류_d                     integer         YES
+     산업분류_e                     integer         YES
+     산업분류_f                     integer         YES
+     산업분류_g                     integer         YES
+     산업분류_h                     integer         YES
+     산업분류_i                     integer         YES
+     산업분류_j                     integer         YES
+     산업분류_k                     integer         YES
+     산업분류_l                     integer         YES
+     산업분류_m                     integer         YES
+     산업분류_n                     integer         YES
+     산업분류_o                     integer         YES
+     산업분류_p                     integer         YES
+     산업분류_q                     integer         YES
+     산업분류_r                     integer         YES
+     산업분류_s                     integer         YES
+     산업분류_t                     integer         YES
+     산업분류_u                     integer         YES
+     법인구분_1                     integer         YES
+     법인구분_2                     integer         YES
+     법인구분_3                     integer         YES
+     법인구분_4                     integer         YES
+     법인구분_5                     integer         YES
+      폐업_기타                     integer         YES
+ 폐업사유구분_1_0                     integer         YES
+ 폐업사유구분_8_0                     integer         YES
+ 폐업사유구분_9_0                     integer         YES
+ created_at timestamp without time zone         YES
+
+### giup_cal_backup
+column_name                   data_type is_nullable
+         id                     integer         YES
+       기준년월           character varying         YES
+        시도명           character varying         YES
+       시군구명           character varying         YES
+       지역코드           character varying         YES
+       총인구수                     integer         YES
+        가구수                     integer         YES
+        남자수                     integer         YES
+        여자수                     integer         YES
+       남자비율                     numeric         YES
+       여자비율                     numeric         YES
+      총기업체수                     integer         YES
+     산업분류_9                     integer         YES
+     산업분류_a                     integer         YES
+     산업분류_b                     integer         YES
+     산업분류_c                     integer         YES
+     산업분류_d                     integer         YES
+     산업분류_e                     integer         YES
+     산업분류_f                     integer         YES
+     산업분류_g                     integer         YES
+     산업분류_h                     integer         YES
+     산업분류_i                     integer         YES
+     산업분류_j                     integer         YES
+     산업분류_k                     integer         YES
+     산업분류_l                     integer         YES
+     산업분류_m                     integer         YES
+     산업분류_n                     integer         YES
+     산업분류_o                     integer         YES
+     산업분류_p                     integer         YES
+     산업분류_q                     integer         YES
+     산업분류_r                     integer         YES
+     산업분류_s                     integer         YES
+     산업분류_t                     integer         YES
+     산업분류_u                     integer         YES
+     법인구분_1                     integer         YES
+     법인구분_2                     integer         YES
+     법인구분_3                     integer         YES
+     법인구분_4                     integer         YES
+     법인구분_5                     integer         YES
+      폐업_기타                     integer         YES
+ 폐업사유구분_1_0                     integer         YES
+ 폐업사유구분_8_0                     integer         YES
+ 폐업사유구분_9_0                     integer         YES
+ created_at timestamp without time zone         YES
+
+### m_giuphap
+column_name                   data_type is_nullable
+         id                     integer          NO
+       기준년월           character varying          NO
+        시도명           character varying         YES
+       시군구명           character varying         YES
+       기업체수                        text         YES
+ 폐업사유구분_1_0                        text         YES
+ 폐업사유구분_9_0                        text         YES
+ 폐업사유구분_8_0                        text         YES
+      폐업_기타                        text         YES
+     법인구분_1                        text         YES
+     법인구분_2                        text         YES
+     법인구분_3                        text         YES
+     법인구분_4                        text         YES
+     법인구분_5                        text         YES
+     산업분류_9                        text         YES
+     산업분류_A                        text         YES
+     산업분류_B                        text         YES
+     산업분류_C                        text         YES
+     산업분류_D                        text         YES
+     산업분류_E                        text         YES
+     산업분류_F                        text         YES
+     산업분류_G                        text         YES
+     산업분류_H                        text         YES
+     산업분류_I                        text         YES
+     산업분류_J                        text         YES
+     산업분류_K                        text         YES
+     산업분류_L                        text         YES
+     산업분류_M                        text         YES
+     산업분류_N                        text         YES
+     산업분류_O                        text         YES
+     산업분류_P                        text         YES
+     산업분류_Q                        text         YES
+     산업분류_R                        text         YES
+     산업분류_S                        text         YES
+     산업분류_T                        text         YES
+     산업분류_U                        text         YES
+ created_at timestamp without time zone         YES
+
+### m_merge
+column_name                   data_type is_nullable
+         id                     integer          NO
+       기준년월           character varying         YES
+        시도명           character varying         YES
+       시군구명           character varying         YES
+       기업체수                        text         YES
+ 폐업사유구분_1_0                        text         YES
+ 폐업사유구분_9_0                        text         YES
+ 폐업사유구분_8_0                        text         YES
+      폐업_기타                        text         YES
+     법인구분_1                        text         YES
+     법인구분_2                        text         YES
+     법인구분_3                        text         YES
+     법인구분_4                        text         YES
+     법인구분_5                        text         YES
+     산업분류_9                        text         YES
+     산업분류_a                        text         YES
+     산업분류_b                        text         YES
+     산업분류_c                        text         YES
+     산업분류_d                        text         YES
+     산업분류_e                        text         YES
+     산업분류_f                        text         YES
+     산업분류_g                        text         YES
+     산업분류_h                        text         YES
+     산업분류_i                        text         YES
+     산업분류_j                        text         YES
+     산업분류_k                        text         YES
+     산업분류_l                        text         YES
+     산업분류_m                        text         YES
+     산업분류_n                        text         YES
+     산업분류_o                        text         YES
+     산업분류_p                        text         YES
+     산업분류_q                        text         YES
+     산업분류_r                        text         YES
+     산업분류_s                        text         YES
+     산업분류_t                        text         YES
+     산업분류_u                        text         YES
+       지역코드           character varying         YES
+       총인구수                     integer         YES
+        가구수                     integer         YES
+        남자수                     integer         YES
+        여자수                     integer         YES
+ created_at timestamp without time zone         YES
+
+### v_cities_with_sub_districts
+     column_name         data_type is_nullable
+    sigungu_code character varying         YES
+      sigungu_nm character varying         YES
+sub_district_cnt            bigint         YES
+
+### v_parent_sigungu_map
+        column_name         data_type is_nullable
+   sub_sigungu_code character varying         YES
+     sub_sigungu_nm character varying         YES
+parent_sigungu_code character varying         YES
+  parent_sigungu_nm character varying         YES
+
+### v_sigungu_age_group
+  column_name data_type is_nullable
+ sigungu_code      text         YES
+      sido_nm      text         YES
+   sigungu_nm      text         YES
+      base_ym      date         YES
+    total_pop    bigint         YES
+      pop_0_9    bigint         YES
+    pop_10_19    bigint         YES
+    pop_20_29    bigint         YES
+    pop_30_39    bigint         YES
+    pop_40_49    bigint         YES
+    pop_50_59    bigint         YES
+    pop_60_69    bigint         YES
+    pop_70_79    bigint         YES
+    pop_80_89    bigint         YES
+    pop_90_99    bigint         YES
+ pop_100_over    bigint         YES
+  elderly_pop    bigint         YES
+elderly_ratio   numeric         YES
+
+### v_sigungu_population
+  column_name data_type is_nullable
+ sigungu_code      text         YES
+      sido_nm      text         YES
+   sigungu_nm      text         YES
+    region_nm      text         YES
+      base_ym      date         YES
+    total_pop    bigint         YES
+     male_pop    bigint         YES
+   female_pop    bigint         YES
+household_cnt    bigint         YES
+    sex_ratio   numeric         YES
+
+### v_sigungu_population_rank
+  column_name data_type is_nullable
+         rank    bigint         YES
+ sigungu_code      text         YES
+      sido_nm      text         YES
+   sigungu_nm      text         YES
+    total_pop    bigint         YES
+     male_pop    bigint         YES
+   female_pop    bigint         YES
+household_cnt    bigint         YES
+      base_ym      date         YES
+
+### v_sub_district_population
+        column_name         data_type is_nullable
+       sigungu_code character varying         YES
+            sido_nm character varying         YES
+         sigungu_nm character varying         YES
+    is_sub_district           boolean         YES
+parent_sigungu_code              text         YES
+            base_ym              date         YES
+          total_pop            bigint         YES
+           male_pop            bigint         YES
+         female_pop            bigint         YES

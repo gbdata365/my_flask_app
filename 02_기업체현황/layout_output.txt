@@ -1,0 +1,161 @@
+
+================================================================================
+시트: 분기기업통계등록부_사업자등록기준
+================================================================================
+헤더 행: 2
+헤더: [np.float64(nan), '번호', '영문항목명(표준화 전)', '영문항목명(표준화)', '속성', '길이', '한글항목명(표준화 전)', '한글항목명(표준화)', '항목설명', '명부추출', '센터 분석']
+
+추출된 컬럼 매핑 (70개):
+--------------------------------------------------------------------------------
+  1 | CRTR_YR              | 기준연도                 | CHAR       | 4
+  2 | QU_SE_CD             | 분기구분코드               | VARCHAR2   | 1
+  3 | BRNO                 | 사업자등록번호              | CHAR       | 12
+  4 | CRNO                 | 법인등록번호               | CHAR       | 12
+  5 | OGNZ_SE_CD           | 조직구분코드               | VARCHAR2   | 1
+  6 | OGNZ_SHAPE_CD        | 조직형태코드               | VARCHAR2   | 1
+  7 | BZENT_NM             | 사업체명                 | VARCHAR2   | 200
+  8 | BZENT_TELNO          | 사업체전화번호              | VARCHAR2   | 999
+  9 | OVHL_BZENT_TELNO     | 정비사업체전화번호            | VARCHAR2   | 999
+ 10 | SPIDN                | 통계목적고유번호             | VARCAHR2   | 10
+ 11 | RPRSV_NM             | 대표자명                 | VARCHAR2   | 200
+ 12 | RPRSV_SD_CD          | 대표자성별코드              | VARCHAR2   | 1
+ 13 | RPRSV_BRTH_YR        | 대표자출생연도              | CHAR       | 4
+ 14 | RPRSV_BRDT           | 대표자생년월일              | CHAR       | 8
+ 15 | REG_YMD              | 등록일자                 | CHAR       | 8
+ 16 | OPBIZ_YMD            | 개업일자                 | CHAR       | 8
+ 17 | CLSBIZ_YMD           | 폐업일자                 | CHAR       | 8
+ 18 | CLSBIZ_YN            | 폐업여부                 | CHAR       | 1
+19  | CLSBIZ_RSN_SE_CD     | 폐업사유구분코드             | CHAR       | 2
+ 20 | CLSBIZ_DCLR_YMD      | 폐업신고일자               | CHAR       | 8
+ 21 | ADCLSF_CTPV_CD       | 행정구역분류시도코드           | VARCHAR2   | 2
+ 22 | ADCLSF_SGG_CD        | 행정구역분류시군구코드          | VARCHAR2   | 5
+ 23 | ADMDST_CLSF_CD       | 행정구역분류코드             | VARCHAR2   | 8
+ 24 | CTPV_NM              | 시도명                  | VARCHAR2   | 40
+ 25 | SGG_NM               | 시군구명                 | VARCHAR2   | 100
+ 26 | EMD_NM               | 읍면동명                 | VARCHAR2   | 200
+ 27 | STLI_NM              | 법정리명                 | VARCHAR2   | 100
+ 28 | STDG_CD              | 법정동코드                | VARCHAR2   | 10
+ 29 | MTN_SE_CD            | 산구분코드                | VARCHAR2   | 1
+ 30 | MNO                  | 본번                   | VARCHAR2   | 4
+ 31 | SNO                  | 부번                   | VARCHAR2   | 4
+ 32 | TONG                 | 통                    | VARCHAR2   | 20
+ 33 | BAN                  | 반                    | VARCHAR2   | 20
+ 34 | ROAD_NM              | 도로명                  | VARCHAR2   | 200
+ 35 | ROAD_NM_CD           | 도로명코드                | VARCHAR2   | 12
+ 36 | UDGD_SE_CD           | 지하구분코드               | VARCHAR2   | 1
+ 37 | BMNO                 | 건물본번                 | VARCHAR2   | 5
+ 38 | BSNO                 | 건물부번                 | VARCHAR2   | 5
+ 39 | BLDG_NM              | 건물명                  | VARCHAR2   | 300
+ 40 | BDG_NM               | 건물동명                 | VARCHAR2   | 200
+ 41 | BLDG_FLR_NM          | 건물층명                 | VARCHAR2   | 200
+ 42 | BLH_NM               | 건물호명                 | VARCHAR2   | 200
+ 43 | SBR_ESCN             | 기업통계등록부사업체고유번호       | VARCHAR2   | 11
+ 44 | BZENT_KSIC_LVL1_CD   | 사업체한국표준산업분류1레벨코드     | VARCHAR2   | 1
+ 45 | BZENT_KSIC_LVL5_CD   | 사업체한국표준산업분류5레벨코드     | VARCHAR2   | 5
+ 46 | BZENT_KSDR11_LVL1_CD | 사업체한국표준산업분류11차1레벨코드  | VARCHAR2   | 1
+ 47 | BZENT_KSDR11_LVL5_CD | 사업체한국표준산업분류11차5레벨코드  | VARCHAR2   | 5
+ 48 | BZENT_CNT            | 사업체수                 | NUMBER     | 10
+ 49 | RPRS_BZENT_YN        | 대표사업체여부              | CHAR       | 1
+ 50 | SBR_BZCN             | 기업통계등록부기업고유번호        | VARCHAR2   | 11
+ 51 | ENT_SLS_AMT          | 기업매출금액               | NUMBER     | 15
+ 52 | ENT_WKER_CNT         | 기업종사자수               | NUMBER     | 10
+ 53 | ENT_RGEMP_CNT        | 기업상용근로자수             | NUMBER     | 10
+ 54 | ENT_MAN_RGEMP_CNT    | 기업남자상용근로자수           | NUMBER     | 10
+ 55 | ENT_WMAN_RGEMP_CNT   | 기업여자상용근로자수           | NUMBER     | 10
+ 56 | ENT_TDWRKR_CNT       | 기업임시일용근로자수           | NUMBER     | 10
+ 57 | ENT_MAN_TDWRKR_CNT   | 기업남자임시일용근로자수         | NUMBER     | 10
+ 58 | ENT_WMAN_TDWRKR_CNT  | 기업여자임시일용근로자수         | NUMBER     | 10
+ 59 | ENT_KSIC_LVL1_CD     | 기업한국표준산업분류1레벨코드      | VARCHAR2   | 1
+ 60 | ENT_KSIC_LVL2_CD     | 기업한국표준산업분류2레벨코드      | VARCHAR2   | 2
+ 61 | ENT_KSIC_LVL3_CD     | 기업한국표준산업분류3레벨코드      | VARCHAR2   | 3
+ 62 | ONLINE_SLSA_RQST_NOCS | 온라인판매대행의뢰건수          | NUMBER     | 10
+ 63 | ONLINE_SLSA_RQST_AMT | 온라인판매대행의뢰금액          | NUMBER     | 15
+ 64 | ONLINE_STLA_RQST_NOCS | 온라인결제대행의뢰건수          | NUMBER     | 10
+ 65 | ONLINE_STLA_RQST_AMT | 온라인결제대행의뢰금액          | NUMBER     | 15
+ 66 | DATA_OVHL_RMRK       | 자료정비비고               | VARCHAR2   | 1000
+ 67 | TH1_CNCNT_RGN_TYPE_CD | 1번째밀집지역유형코드          | VARCHAR2   | 2
+ 68 | TH1_CNCNT_RGN_NM     | 1번째밀집지역명             | VARCHAR2   | 200
+ 69 | TH2_CNCNT_RGN_TYPE_CD | 2번째밀집지역유형코드          | VARCHAR2   | 2
+ 70 | TH2_CNCNT_RGN_NM     | 2번째밀집지역명             | VARCHAR2   | 200
+
+================================================================================
+시트: 분기기업통계등록부_대표자기준
+================================================================================
+헤더 행: 3
+헤더: [np.float64(nan), '번호', '영문항목명(표준화 전)', '영문항목명(표준화)', '속성', '길이', '한글항목명(표준화 전)', '한글항목명(표준화)', '항목설명', '명부추출', '센터 분석']
+
+추출된 컬럼 매핑 (70개):
+--------------------------------------------------------------------------------
+  1 | CRTR_YR              | 기준연도                 | CHAR       | 4
+  2 | QU_SE_CD             | 분기구분코드               | VARCHAR2   | 1
+  3 | BRNO                 | 사업자등록번호              | CHAR       | 12
+  4 | CRNO                 | 법인등록번호               | CHAR       | 12
+  5 | OGNZ_SE_CD           | 조직구분코드               | VARCHAR2   | 1
+  6 | OGNZ_SHAPE_CD        | 조직형태코드               | VARCHAR2   | 1
+  7 | BZENT_NM             | 사업체명                 | VARCHAR2   | 200
+  8 | BZENT_TELNO          | 사업체전화번호              | VARCHAR2   | 999
+  9 | OVHL_BZENT_TELNO     | 정비사업체전화번호            | VARCHAR2   | 999
+ 10 | SPIDN                | 통계목적고유번호             | VARCAHR2   | 10
+ 11 | RPRSV_NM             | 대표자명                 | VARCHAR2   | 200
+ 12 | RPRSV_SD_CD          | 대표자성별코드              | VARCHAR2   | 1
+ 13 | RPRSV_BRTH_YR        | 대표자출생연도              | CHAR       | 4
+ 14 | RPRSV_BRDT           | 대표자생년월일              | CHAR       | 8
+ 15 | REG_YMD              | 등록일자                 | CHAR       | 8
+ 16 | OPBIZ_YMD            | 개업일자                 | CHAR       | 8
+ 17 | CLSBIZ_YMD           | 폐업일자                 | CHAR       | 8
+ 18 | CLSBIZ_YN            | 폐업여부                 | CHAR       | 1
+19  | CLSBIZ_RSN_SE_CD     | 폐업사유구분코드             | CHAR       | 2
+ 20 | CLSBIZ_DCLR_YMD      | 폐업신고일자               | CHAR       | 8
+ 21 | ADCLSF_CTPV_CD       | 행정구역분류시도코드           | VARCHAR2   | 2
+ 22 | ADCLSF_SGG_CD        | 행정구역분류시군구코드          | VARCHAR2   | 5
+ 23 | ADMDST_CLSF_CD       | 행정구역분류코드             | VARCHAR2   | 8
+ 24 | CTPV_NM              | 시도명                  | VARCHAR2   | 40
+ 25 | SGG_NM               | 시군구명                 | VARCHAR2   | 100
+ 26 | EMD_NM               | 읍면동명                 | VARCHAR2   | 200
+ 27 | STLI_NM              | 법정리명                 | VARCHAR2   | 100
+ 28 | STDG_CD              | 법정동코드                | VARCHAR2   | 10
+ 29 | MTN_SE_CD            | 산구분코드                | VARCHAR2   | 1
+ 30 | MNO                  | 본번                   | VARCHAR2   | 4
+ 31 | SNO                  | 부번                   | VARCHAR2   | 4
+ 32 | TONG                 | 통                    | VARCHAR2   | 20
+ 33 | BAN                  | 반                    | VARCHAR2   | 20
+ 34 | ROAD_NM              | 도로명                  | VARCHAR2   | 200
+ 35 | ROAD_NM_CD           | 도로명코드                | VARCHAR2   | 12
+ 36 | UDGD_SE_CD           | 지하구분코드               | VARCHAR2   | 1
+ 37 | BMNO                 | 건물본번                 | VARCHAR2   | 5
+ 38 | BSNO                 | 건물부번                 | VARCHAR2   | 5
+ 39 | BLDG_NM              | 건물명                  | VARCHAR2   | 300
+ 40 | BDG_NM               | 건물동명                 | VARCHAR2   | 200
+ 41 | BLDG_FLR_NM          | 건물층명                 | VARCHAR2   | 200
+ 42 | BLH_NM               | 건물호명                 | VARCHAR2   | 200
+ 43 | SBR_ESCN             | 기업통계등록부사업체고유번호       | VARCHAR2   | 11
+ 44 | BZENT_KSIC_LVL1_CD   | 사업체한국표준산업분류1레벨코드     | VARCHAR2   | 1
+ 45 | BZENT_KSIC_LVL5_CD   | 사업체한국표준산업분류5레벨코드     | VARCHAR2   | 5
+ 46 | BZENT_KSDR11_LVL1_CD | 사업체한국표준산업분류11차1레벨코드  | VARCHAR2   | 1
+ 47 | BZENT_KSDR11_LVL5_CD | 사업체한국표준산업분류11차5레벨코드  | VARCHAR2   | 5
+ 48 | BZENT_CNT            | 사업체수                 | NUMBER     | 10
+ 49 | RPRS_BZENT_YN        | 대표사업체여부              | CHAR       | 1
+ 50 | SBR_BZCN             | 기업통계등록부기업고유번호        | VARCHAR2   | 11
+ 51 | ENT_SLS_AMT          | 기업매출금액               | NUMBER     | 15
+ 52 | ENT_WKER_CNT         | 기업종사자수               | NUMBER     | 10
+ 53 | ENT_RGEMP_CNT        | 기업상용근로자수             | NUMBER     | 10
+ 54 | ENT_MAN_RGEMP_CNT    | 기업남자상용근로자수           | NUMBER     | 10
+ 55 | ENT_WMAN_RGEMP_CNT   | 기업여자상용근로자수           | NUMBER     | 10
+ 56 | ENT_TDWRKR_CNT       | 기업임시일용근로자수           | NUMBER     | 10
+ 57 | ENT_MAN_TDWRKR_CNT   | 기업남자임시일용근로자수         | NUMBER     | 10
+ 58 | ENT_WMAN_TDWRKR_CNT  | 기업여자임시일용근로자수         | NUMBER     | 10
+ 59 | ENT_KSIC_LVL1_CD     | 기업한국표준산업분류1레벨코드      | VARCHAR2   | 1
+ 60 | ENT_KSIC_LVL2_CD     | 기업한국표준산업분류2레벨코드      | VARCHAR2   | 2
+ 61 | ENT_KSIC_LVL3_CD     | 기업한국표준산업분류3레벨코드      | VARCHAR2   | 3
+ 62 | ONLINE_SLSA_RQST_NOCS | 온라인판매대행의뢰건수          | NUMBER     | 10
+ 63 | ONLINE_SLSA_RQST_AMT | 온라인판매대행의뢰금액          | NUMBER     | 15
+ 64 | ONLINE_STLA_RQST_NOCS | 온라인결제대행의뢰건수          | NUMBER     | 10
+ 65 | ONLINE_STLA_RQST_AMT | 온라인결제대행의뢰금액          | NUMBER     | 15
+ 66 | DATA_OVHL_RMRK       | 자료정비비고               | VARCHAR2   | 1000
+ 67 | TH1_CNCNT_RGN_TYPE_CD | 1번째밀집지역유형코드          | VARCHAR2   | 2
+ 68 | TH1_CNCNT_RGN_NM     | 1번째밀집지역명             | VARCHAR2   | 200
+ 69 | TH2_CNCNT_RGN_TYPE_CD | 2번째밀집지역유형코드          | VARCHAR2   | 2
+ 70 | TH2_CNCNT_RGN_NM     | 2번째밀집지역명             | VARCHAR2   | 200
+
+
+매핑 정보 저장: C:\Users\user\01_claude_project\02_기업체현황\column_mappings.json

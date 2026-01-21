@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1243A6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>{{ title }} - 인구통계 대시보드</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-dark: #1243A6;
+            --primary: #1D64F2;
+            --dark: #011C40;
+            --light: #F2EED8;
+            --accent: #F24822;
+            --header-height: 56px;
+            --filter-height: auto;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== 헤더 ===== */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            padding: 0.75rem 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            height: var(--header-height);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 메인 네비게이션 */
+        .main-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 2rem;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .nav-link.active {
+            background: var(--accent);
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-home {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background 0.3s;
+        }
+
+        .btn-home:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        /* 로딩 오버레이 */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-overlay.show {
+            display: flex;
+        }
+        .loading-box {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        /* ===== 필터 섹션 ===== */
+        .filter-section {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #ddd;
+            position: sticky;
+            top: var(--header-height);
+            z-index: 99;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .filter-container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: var(--dark);
+            font-size: 0.75rem;
+            white-space: nowrap;
+        }
+
+        .filter-group select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            width: 100%;
+            background: white;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(29, 100, 242, 0.2);
+        }
+
+        /* 체크박스 스타일 */
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text);
+            white-space: nowrap;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-hint {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #666;
+            font-size: 11px;
+            cursor: help;
+        }
+
+        .btn-search, .btn-report {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.25rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-report {
+            background: #4caf50;
+            font-size: 0.9rem;
+            font-weight: 500;
+            white-space: nowrap;
+            min-width: 70px;
+            align-self: flex-end;
+        }
+
+        .btn-search:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-search:active {
+            transform: translateY(0);
+        }
+
+        /* ===== 메인 콘텐츠 ===== */
+        .main-content {
+            padding: 1rem;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        /* ===== 요약 카드 ===== */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 10px;
+            padding: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .summary-card .label {
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 0.2rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .summary-card .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            line-height: 1.2;
+        }
+
+        .summary-card .unit {
+            font-size: 0.65rem;
+            color: #999;
+        }
+
+        /* ===== 차트 섹션 ===== */
+        .chart-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        .chart-card h3 {
+            font-size: 0.9rem;
+            color: var(--dark);
+            margin: 0 0 0.75rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        .chart-container.small {
+            height: 200px;
+        }
+
+        .pie-charts {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .pie-charts h3 {
+            font-size: 0.85rem;
+        }
+
+        /* ===== 데이터 테이블 섹션 ===== */
+        .data-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #eee;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-dark);
+            border-bottom-color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .section-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--dark);
+        }
+
+        .badge-info {
+            background: var(--primary);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            min-width: 600px;
+        }
+
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            background: var(--primary-dark);
+            color: white;
+            z-index: 10;
+        }
+
+        .data-table th {
+            padding: 0.6rem 0.5rem;
+            text-align: right;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .data-table th:first-child {
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background: var(--primary-dark);
+            z-index: 11;
+        }
+
+        .data-table td {
+            padding: 0.5rem;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+
+        .data-table td:first-child {
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 1;
+        }
+
+        .data-table tbody tr:hover td {
+            background: #f0f7ff;
+        }
+
+        .data-table tbody tr:hover td:first-child {
+            background: #f0f7ff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ===== 반응형: 태블릿 (768px ~ 1024px) ===== */
+        @media (max-width: 1024px) {
+            .chart-section {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* ===== 반응형: 모바일 가로 (576px ~ 768px) ===== */
+        @media (max-width: 768px) {
+            :root {
+                --header-height: 50px;
+            }
+
+            .header {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1rem;
+            }
+
+            .btn-home {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .filter-section {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .filter-row {
+                gap: 0.5rem;
+            }
+
+            .filter-group {
+                min-width: 100px;
+            }
+
+            .filter-group select {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.85rem;
+                padding-right: 25px;
+            }
+
+            .btn-search {
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.5rem;
+            }
+
+            .summary-card {
+                padding: 0.5rem 0.25rem;
+            }
+
+            .summary-card .label {
+                font-size: 0.6rem;
+            }
+
+            .summary-card .value {
+                font-size: 0.95rem;
+            }
+
+            .summary-card .unit {
+                font-size: 0.55rem;
+            }
+
+            .chart-container {
+                height: 220px;
+            }
+
+            .chart-container.small {
+                height: 180px;
+            }
+
+            .pie-charts {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+
+            .data-table {
+                font-size: 0.75rem;
+                min-width: 500px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.4rem 0.3rem;
+            }
+        }
+
+        /* ===== 반응형: 모바일 세로 (~ 576px) ===== */
+        @media (max-width: 576px) {
+            :root {
+                --header-height: 48px;
+            }
+
+            .header h1 {
+                font-size: 0.9rem;
+                max-width: 200px;
+            }
+
+            .filter-section {
+                top: var(--header-height);
+            }
+
+            .filter-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.5rem;
+            }
+
+            .filter-group {
+                min-width: unset;
+            }
+
+            .filter-group:nth-child(4) {
+                grid-column: span 2;
+            }
+
+            .btn-search {
+                grid-column: span 2;
+                width: 100%;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.5rem;
+            }
+
+            .summary-card {
+                padding: 0.6rem;
+            }
+
+            .summary-card .label {
+                font-size: 0.65rem;
+            }
+
+            .summary-card .value {
+                font-size: 1rem;
+            }
+
+            .summary-card .unit {
+                font-size: 0.6rem;
+            }
+
+            .chart-section {
+                gap: 0.75rem;
+            }
+
+            .chart-card {
+                padding: 0.75rem;
+            }
+
+            .chart-card h3 {
+                font-size: 0.8rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .chart-container {
+                height: 200px;
+            }
+
+            .chart-container.small {
+                height: 160px;
+            }
+
+            .pie-charts {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .pie-charts > div {
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid #eee;
+            }
+
+            .pie-charts > div:last-child {
+                border-bottom: none;
+            }
+
+            .tab-btn {
+                padding: 0.6rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .section-header {
+                padding: 0.6rem 0.75rem;
+            }
+
+            .section-header h2 {
+                font-size: 0.85rem;
+            }
+
+            .table-container {
+                max-height: 350px;
+            }
+
+            .data-table {
+                font-size: 0.7rem;
+                min-width: 450px;
+            }
+        }
+
+        /* ===== 반응형: 아주 작은 화면 (~ 375px) ===== */
+        @media (max-width: 375px) {
+            .header h1 {
+                font-size: 0.85rem;
+                max-width: 160px;
+            }
+
+            .filter-group label {
+                font-size: 0.65rem;
+            }
+
+            .filter-group select {
+                font-size: 0.8rem;
+                padding: 0.35rem 0.4rem;
+            }
+
+            .summary-card .value {
+                font-size: 0.9rem;
+            }
+
+            .chart-container {
+                height: 180px;
+            }
+
+            .chart-container.small {
+                height: 150px;
+            }
+        }
+
+        /* ===== 인쇄 스타일 ===== */
+        @media print {
+            .header, .filter-section {
+                position: static;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .chart-section {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .table-container {
+                max-height: none;
+                overflow: visible;
+            }
+
+            .data-table th:first-child,
+            .data-table td:first-child {
+                position: static;
+            }
+        }
+
+        /* ===== 다크 모드 지원 (시스템 설정 따름) ===== */
+        @media (prefers-color-scheme: dark) {
+            /* 필요시 다크 모드 스타일 추가 */
+        }
+
+        /* ===== 접근성: 포커스 표시 ===== */
+        .tab-btn:focus,
+        .btn-search:focus,
+        .btn-home:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* ===== 터치 디바이스 최적화 ===== */
+        @media (hover: none) and (pointer: coarse) {
+            .summary-card:hover {
+                transform: none;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+
+            .btn-search:hover {
+                transform: none;
+            }
+
+            .filter-group select,
+            .btn-search,
+            .tab-btn {
+                min-height: 44px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">페이지를 불러오는 중...</div>
+        </div>
+    </div>
+
+    <header class="header">
+        <div class="header-content">
+            <h1><a href="/{{ category_name }}" style="color: white; text-decoration: none;">{{ category_name }}</a></h1>
+            <nav class="main-nav">
+                {% for item in menu_items %}
+                <a href="{{ item.url }}" class="nav-link" data-type="{{ item.type }}" data-url="{{ item.url }}">
+                    {% if item.type == 'markdown' %}📄{% elif item.type == 'html' %}🌐{% else %}⚙️{% endif %}
+                    {{ item.name }}
+                </a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+
+    <section class="filter-section">
+        <div class="filter-container">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>기준시기</label>
+                    <select id="filterBaseYm">
+                        <option value="">전체</option>
+                        {% for ym in filters.base_ym_list %}
+                        <option value="{{ ym }}">{{ ym[:4] }}.{{ ym[4:] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>시도</label>
+                    <select id="filterSido">
+                        <option value="">전체</option>
+                        {% for sido in filters.sido_list %}
+                        <option value="{{ sido }}">{{ sido }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>시군구</label>
+                    <select id="filterSigungu" disabled>
+                        <option value="">전체</option>
+                    </select>
+                </div>
+                <div class="filter-group filter-checkbox">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="filterConsolidated" checked>
+                        <span>시군구통합</span>
+                    </label>
+                    <span class="checkbox-hint" title="체크: 수원시 장안구+권선구+팔달구+영통구 → 수원시로 합산&#10;해제: 각 구별로 개별 표시">?</span>
+                </div>
+                <button class="btn-search" onclick="loadData()">조회</button>
+                <button class="btn-report" onclick="saveReport()">보고서 저장</button>
+            </div>
+        </div>
+    </section>
+
+    <main class="main-content">
+        <!-- 요약 카드 -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="label">총 인구</div>
+                <div class="value" id="totalPop">-</div>
+                <div class="unit">만 명</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">남자</div>
+                <div class="value" id="malePop">-</div>
+                <div class="unit">만 명</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">여자</div>
+                <div class="value" id="femalePop">-</div>
+                <div class="unit">만 명</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">세대수</div>
+                <div class="value" id="householdCnt">-</div>
+                <div class="unit">만 세대</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">1인세대</div>
+                <div class="value" id="singleHousehold">-</div>
+                <div class="unit">만 세대</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">1인세대율</div>
+                <div class="value highlight" id="singleRatio">-</div>
+                <div class="unit">%</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">성비</div>
+                <div class="value" id="sexRatio">-</div>
+                <div class="unit">여100당</div>
+            </div>
+            <div class="summary-card">
+                <div class="label">행정구역</div>
+                <div class="value" id="areaCount">-</div>
+                <div class="unit">개</div>
+            </div>
+        </div>
+
+        <!-- 차트 섹션 -->
+        <div class="chart-section">
+            <div class="chart-card">
+                <h3>시도별 남녀 인구 (만 명)</h3>
+                <div class="chart-container">
+                    <canvas id="chartSidoPop"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>시도별 1인세대 비율 (%)</h3>
+                <div class="chart-container">
+                    <canvas id="chartSingleRatio"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-section">
+            <div class="chart-card">
+                <h3>인구 Top 10 시군구 (만 명)</h3>
+                <div class="chart-container">
+                    <canvas id="chartTop10"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="pie-charts">
+                    <div>
+                        <h3>성별 인구</h3>
+                        <div class="chart-container small">
+                            <canvas id="chartGenderPie"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>세대 구성</h3>
+                        <div class="chart-container small">
+                            <canvas id="chartHouseholdPie"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 데이터 테이블 -->
+        <div class="data-section">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('sido')">시도별</button>
+                <button class="tab-btn" onclick="switchTab('sigungu')">시군구별</button>
+                <button class="tab-btn" onclick="switchTab('emd')">읍면동별</button>
+            </div>
+
+            <div id="tabSido" class="tab-content active">
+                <div class="section-header">
+                    <h2>시도별 인구 현황</h2>
+                    <span class="badge-info" id="sidoCount">0건</span>
+                </div>
+                <div class="table-container">
+                    <table class="data-table" id="sidoTable">
+                        <thead>
+                            <tr>
+                                <th>시도</th>
+                                <th>인구(만)</th>
+                                <th>남자</th>
+                                <th>여자</th>
+                                <th>세대</th>
+                                <th>1인세대</th>
+                                <th>1인(%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sidoTableBody">
+                            <tr><td colspan="7" class="loading">조회 버튼을 클릭하세요</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabSigungu" class="tab-content">
+                <div class="section-header">
+                    <h2>시군구별 인구 현황</h2>
+                    <span class="badge-info" id="sigunguCount">0건</span>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>시군구</th>
+                                <th>인구(만)</th>
+                                <th>남자</th>
+                                <th>여자</th>
+                                <th>세대</th>
+                                <th>1인세대</th>
+                                <th>1인(%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sigunguTableBody">
+                            <tr><td colspan="7" class="loading">시도를 선택하세요</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tabEmd" class="tab-content">
+                <div class="section-header">
+                    <h2>읍면동별 인구 현황</h2>
+                    <span class="badge-info" id="emdCount">0건</span>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>읍면동</th>
+                                <th>시군구</th>
+                                <th>인구</th>
+                                <th>남자</th>
+                                <th>여자</th>
+                                <th>세대</th>
+                                <th>1인세대</th>
+                                <th>1인(%)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="emdTableBody">
+                            <tr><td colspan="8" class="loading">조회 버튼을 클릭하세요</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Chart 인스턴스 저장
+        let charts = {};
+
+        // 숫자 포맷팅
+        function formatNumber(num) {
+            if (num === null || num === undefined) return '-';
+            return num.toLocaleString('ko-KR');
+        }
+
+        function formatMan(num) {
+            if (num === null || num === undefined) return '-';
+            return (num / 10000).toFixed(1);
+        }
+
+        // 차트 생성/업데이트 함수
+        function createOrUpdateChart(canvasId, type, data, options = {}) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            if (charts[canvasId]) {
+                charts[canvasId].destroy();
+            }
+
+            // 모바일에서 폰트 크기 조정
+            const isMobile = window.innerWidth < 576;
+            const isTablet = window.innerWidth < 768;
+
+            const defaultOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                size: isMobile ? 10 : (isTablet ? 11 : 12)
+                            },
+                            boxWidth: isMobile ? 12 : 16
+                        }
+                    }
+                },
+                scales: options.scales ? {
+                    ...options.scales,
+                    x: {
+                        ...options.scales.x,
+                        ticks: {
+                            font: { size: isMobile ? 9 : (isTablet ? 10 : 11) },
+                            maxRotation: isMobile ? 90 : 45,
+                            ...options.scales?.x?.ticks
+                        }
+                    },
+                    y: {
+                        ...options.scales.y,
+                        ticks: {
+                            font: { size: isMobile ? 9 : (isTablet ? 10 : 11) },
+                            ...options.scales?.y?.ticks
+                        }
+                    }
+                } : undefined
+            };
+
+            charts[canvasId] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: { ...defaultOptions, ...options }
+            });
+        }
+
+        // 시군구 목록 로드
+        document.getElementById('filterSido').addEventListener('change', async function() {
+            const sido = this.value;
+            const sigunguSelect = document.getElementById('filterSigungu');
+
+            sigunguSelect.innerHTML = '<option value="">전체</option>';
+
+            if (!sido) {
+                sigunguSelect.disabled = true;
+                return;
+            }
+
+            try {
+                const response = await fetch(`/01_population/api/sigungu?sido=${encodeURIComponent(sido)}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    result.data.forEach(sigungu => {
+                        const option = document.createElement('option');
+                        option.value = sigungu;
+                        option.textContent = sigungu;
+                        sigunguSelect.appendChild(option);
+                    });
+                    sigunguSelect.disabled = false;
+                }
+            } catch (error) {
+                console.error('시군구 로드 실패:', error);
+            }
+        });
+
+        // 탭 전환
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+
+            const sido = document.getElementById('filterSido').value;
+
+            if (tabName === 'sigungu' && sido) {
+                loadSigunguData();
+            } else if (tabName === 'emd') {
+                loadEmdData();
+            }
+        }
+
+        // 전체 데이터 로드
+        async function loadData() {
+            const base_ym = document.getElementById('filterBaseYm').value;
+            const sido = document.getElementById('filterSido').value;
+            const sigungu = document.getElementById('filterSigungu').value;
+
+            // 병렬 로드
+            await Promise.all([
+                loadSummary(base_ym, sido, sigungu),
+                loadSidoData(),
+                loadCharts()
+            ]);
+
+            // 현재 탭에 따라 추가 로드
+            if (document.getElementById('tabSigungu').classList.contains('active')) {
+                await loadSigunguData();
+            } else if (document.getElementById('tabEmd').classList.contains('active')) {
+                await loadEmdData();
+            }
+        }
+
+        // 요약 로드
+        async function loadSummary(base_ym, sido, sigungu) {
+            try {
+                let url = '/01_population/api/summary?';
+                if (base_ym) url += `base_ym=${base_ym}&`;
+                if (sido) url += `sido=${encodeURIComponent(sido)}&`;
+                if (sigungu) url += `sigungu=${encodeURIComponent(sigungu)}&`;
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) {
+                    const d = result.data;
+                    document.getElementById('totalPop').textContent = formatMan(d.total_pop);
+                    document.getElementById('malePop').textContent = formatMan(d.male_pop);
+                    document.getElementById('femalePop').textContent = formatMan(d.female_pop);
+                    document.getElementById('householdCnt').textContent = formatMan(d.household_cnt);
+                    document.getElementById('singleHousehold').textContent = formatMan(d.single_household_cnt);
+                    document.getElementById('singleRatio').textContent = d.single_ratio;
+                    document.getElementById('sexRatio').textContent = d.sex_ratio;
+                    document.getElementById('areaCount').textContent = formatNumber(d.area_count);
+                }
+            } catch (error) {
+                console.error('요약 로드 실패:', error);
+            }
+        }
+
+        // 차트 로드
+        async function loadCharts() {
+            const base_ym = document.getElementById('filterBaseYm').value;
+            const sido = document.getElementById('filterSido').value;
+            const sigungu = document.getElementById('filterSigungu').value;
+
+            let baseUrl = '/01_population/api/chart/';
+            let params = `?base_ym=${base_ym || ''}&sido=${encodeURIComponent(sido || '')}&sigungu=${encodeURIComponent(sigungu || '')}`;
+
+            try {
+                // 시도별 인구 차트
+                const sidoPopRes = await fetch(baseUrl + 'sido_pop' + params);
+                const sidoPopData = await sidoPopRes.json();
+                if (sidoPopData.success) {
+                    createOrUpdateChart('chartSidoPop', 'bar', {
+                        labels: sidoPopData.labels,
+                        datasets: sidoPopData.datasets
+                    }, {
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            x: { stacked: true },
+                            y: { stacked: true, beginAtZero: true }
+                        }
+                    });
+                }
+
+                // 1인세대 비율 차트
+                const singleRes = await fetch(baseUrl + 'single_ratio' + params);
+                const singleData = await singleRes.json();
+                if (singleData.success) {
+                    createOrUpdateChart('chartSingleRatio', 'bar', {
+                        labels: singleData.labels,
+                        datasets: singleData.datasets
+                    }, {
+                        indexAxis: 'y',
+                        plugins: { legend: { display: false } },
+                        scales: { x: { beginAtZero: true, max: 50 } }
+                    });
+                }
+
+                // Top 10 시군구
+                const top10Res = await fetch(baseUrl + 'sigungu_top10' + params);
+                const top10Data = await top10Res.json();
+                if (top10Data.success) {
+                    createOrUpdateChart('chartTop10', 'bar', {
+                        labels: top10Data.labels,
+                        datasets: top10Data.datasets
+                    }, {
+                        indexAxis: 'y',
+                        plugins: { legend: { display: false } },
+                        scales: { x: { beginAtZero: true } }
+                    });
+                }
+
+                // 성별 파이 차트
+                const genderRes = await fetch(baseUrl + 'gender_pie' + params);
+                const genderData = await genderRes.json();
+                if (genderData.success) {
+                    createOrUpdateChart('chartGenderPie', 'doughnut', {
+                        labels: genderData.labels,
+                        datasets: genderData.datasets
+                    }, {
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const pct = ((context.raw / total) * 100).toFixed(1);
+                                        return `${context.label}: ${formatNumber(context.raw)} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // 세대 구성 파이 차트
+                const hhRes = await fetch(baseUrl + 'household_pie' + params);
+                const hhData = await hhRes.json();
+                if (hhData.success) {
+                    createOrUpdateChart('chartHouseholdPie', 'doughnut', {
+                        labels: hhData.labels,
+                        datasets: hhData.datasets
+                    }, {
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const pct = ((context.raw / total) * 100).toFixed(1);
+                                        return `${context.label}: ${formatNumber(context.raw)} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('차트 로드 실패:', error);
+            }
+        }
+
+        // 시도별 테이블 로드
+        async function loadSidoData() {
+            const base_ym = document.getElementById('filterBaseYm').value;
+            const tbody = document.getElementById('sidoTableBody');
+            tbody.innerHTML = '<tr><td colspan="7" class="loading">로딩 중...</td></tr>';
+
+            try {
+                let url = '/01_population/api/sido_data?';
+                if (base_ym) url += `base_ym=${base_ym}`;
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success && result.data.length > 0) {
+                    document.getElementById('sidoCount').textContent = result.data.length + '건';
+
+                    tbody.innerHTML = result.data.map(row => `
+                        <tr>
+                            <td>${row.sido_nm}</td>
+                            <td>${row.total_pop_man}</td>
+                            <td>${formatNumber(row.male_pop)}</td>
+                            <td>${formatNumber(row.female_pop)}</td>
+                            <td>${formatNumber(row.household_cnt)}</td>
+                            <td>${formatNumber(row.single_household_cnt)}</td>
+                            <td>${row.single_ratio}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" class="loading">데이터가 없습니다</td></tr>';
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">오류 발생</td></tr>';
+            }
+        }
+
+        // 시군구별 테이블 로드
+        async function loadSigunguData() {
+            const base_ym = document.getElementById('filterBaseYm').value;
+            const sido = document.getElementById('filterSido').value;
+            const consolidated = document.getElementById('filterConsolidated').checked;
+            const tbody = document.getElementById('sigunguTableBody');
+
+            if (!sido) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">시도를 선택하세요</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '<tr><td colspan="7" class="loading">로딩 중...</td></tr>';
+
+            try {
+                let url = `/01_population/api/sigungu_data?sido=${encodeURIComponent(sido)}&consolidated=${consolidated}`;
+                if (base_ym) url += `&base_ym=${base_ym}`;
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success && result.data.length > 0) {
+                    document.getElementById('sigunguCount').textContent = result.data.length + '건';
+
+                    tbody.innerHTML = result.data.map(row => `
+                        <tr>
+                            <td>${row.sigungu_nm}</td>
+                            <td>${row.total_pop_man}</td>
+                            <td>${formatNumber(row.male_pop)}</td>
+                            <td>${formatNumber(row.female_pop)}</td>
+                            <td>${formatNumber(row.household_cnt)}</td>
+                            <td>${formatNumber(row.single_household_cnt)}</td>
+                            <td>${row.single_ratio}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="7" class="loading">데이터가 없습니다</td></tr>';
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">오류 발생</td></tr>';
+            }
+        }
+
+        // 읍면동별 테이블 로드
+        async function loadEmdData() {
+            const base_ym = document.getElementById('filterBaseYm').value;
+            const sido = document.getElementById('filterSido').value;
+            const sigungu = document.getElementById('filterSigungu').value;
+            const tbody = document.getElementById('emdTableBody');
+
+            // 시도가 선택되지 않으면 안내 메시지 표시 (전국 읍면동은 너무 많음)
+            if (!sido) {
+                document.getElementById('emdCount').textContent = '-';
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">시도를 선택하면 읍면동 데이터가 표시됩니다</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '<tr><td colspan="8" class="loading">로딩 중...</td></tr>';
+
+            try {
+                let url = '/01_population/api/emd_data?';
+                if (base_ym) url += `base_ym=${base_ym}&`;
+                if (sido) url += `sido=${encodeURIComponent(sido)}&`;
+                if (sigungu) url += `sigungu=${encodeURIComponent(sigungu)}&`;
+
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success && result.data.length > 0) {
+                    document.getElementById('emdCount').textContent = result.data.length + '건';
+
+                    tbody.innerHTML = result.data.map(row => `
+                        <tr>
+                            <td>${row.eupmyeondong_nm || '-'}</td>
+                            <td>${row.sigungu_nm || '-'}</td>
+                            <td>${formatNumber(row.total_pop)}</td>
+                            <td>${formatNumber(row.male_pop)}</td>
+                            <td>${formatNumber(row.female_pop)}</td>
+                            <td>${formatNumber(row.household_cnt)}</td>
+                            <td>${formatNumber(row.single_household_cnt)}</td>
+                            <td>${row.single_ratio}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" class="loading">데이터가 없습니다</td></tr>';
+                }
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">오류 발생</td></tr>';
+            }
+        }
+
+        // 화면 크기 변경 시 차트 재렌더링
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                // 차트가 이미 로드되어 있으면 다시 그리기
+                Object.keys(charts).forEach(key => {
+                    if (charts[key]) {
+                        charts[key].resize();
+                    }
+                });
+            }, 250);
+        });
+
+        // 보고서 저장 함수
+        async function saveReport() {
+            const btn = document.querySelector('.btn-report');
+            btn.textContent = '저장 중...';
+            btn.disabled = true;
+
+            try {
+                // 필터 정보 수집
+                const base_ym = document.getElementById('filterBaseYm').value;
+                const sido = document.getElementById('filterSido').value;
+                const sigungu = document.getElementById('filterSigungu').value;
+                const consolidated = document.getElementById('filterConsolidated').checked;
+
+                // 요약 카드 데이터 수집
+                const summary = {
+                    total_pop: document.getElementById('totalPop').textContent,
+                    male_pop: document.getElementById('malePop').textContent,
+                    female_pop: document.getElementById('femalePop').textContent,
+                    household_cnt: document.getElementById('householdCnt').textContent,
+                    single_household: document.getElementById('singleHousehold').textContent,
+                    single_ratio: document.getElementById('singleRatio').textContent,
+                    sex_ratio: document.getElementById('sexRatio').textContent,
+                    area_count: document.getElementById('areaCount').textContent
+                };
+
+                // 차트 이미지를 Base64로 변환
+                const chartImages = {};
+                const chartIds = ['chartSidoPop', 'chartSingleRatio', 'chartTop10', 'chartGenderPie', 'chartHouseholdPie'];
+                for (const chartId of chartIds) {
+                    const canvas = document.getElementById(chartId);
+                    if (canvas && charts[chartId]) {
+                        chartImages[chartId] = canvas.toDataURL('image/png');
+                    }
+                }
+
+                // 시도별 테이블 데이터 수집
+                const sidoTable = [];
+                document.querySelectorAll('#sidoTableBody tr').forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 7) {
+                        sidoTable.push({
+                            sido_nm: cells[0].textContent,
+                            total_pop: cells[1].textContent,
+                            male_pop: cells[2].textContent,
+                            female_pop: cells[3].textContent,
+                            household_cnt: cells[4].textContent,
+                            single_household_cnt: cells[5].textContent,
+                            single_ratio: cells[6].textContent
+                        });
+                    }
+                });
+
+                // API 호출하여 보고서 저장
+                const response = await fetch('/01_population/api/save_report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filters: { base_ym, sido, sigungu, consolidated },
+                        summary,
+                        chartImages,
+                        sidoTable,
+                        generated_at: new Date().toISOString()
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(`보고서가 저장되었습니다.\n파일: ${result.filename}`);
+                } else {
+                    alert('보고서 저장 실패: ' + result.error);
+                }
+            } catch (error) {
+                console.error('보고서 저장 오류:', error);
+                alert('보고서 저장 중 오류가 발생했습니다.');
+            } finally {
+                btn.textContent = '보고서 저장';
+                btn.disabled = false;
+            }
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            // 네비게이션 활성화 (현재 URL 기준)
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.main-nav .nav-link');
+            navLinks.forEach(link => {
+                const linkUrl = link.getAttribute('data-url') || link.getAttribute('href');
+                if (currentPath === linkUrl || currentPath.startsWith(linkUrl + '/')) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // 필터 초기화
+            const baseYmSelect = document.getElementById('filterBaseYm');
+            if (baseYmSelect.options.length > 1) {
+                baseYmSelect.selectedIndex = 1;
+            }
+            loadData();
+        });
+
+        // 페이지 이동 시 로딩 표시
+        document.querySelectorAll('.main-nav .nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const currentPath = window.location.pathname;
+                const targetPath = this.getAttribute('href');
+
+                // 현재 페이지가 아닌 경우에만 로딩 표시
+                if (currentPath !== targetPath) {
+                    document.getElementById('loadingOverlay').classList.add('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인구 집계표 대시보드</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Matplotlib 정적 이미지 사용 -->
+    <style>
+        :root {
+            --primary-dark: #1243A6;
+            --primary: #1D64F2;
+            --dark: #011C40;
+            --light: #F2EED8;
+            --accent: #F24822;
+        }
+        body { background-color: #f3f4f6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; }
+        .header { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); }
+        .card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-primary-custom { background-color: var(--primary); color: white; border: none; }
+        .btn-primary-custom:hover { background-color: var(--primary-dark); color: white; }
+        .btn-success-custom { background-color: #10b981; color: white; border: none; }
+        .btn-success-custom:hover { background-color: #059669; color: white; }
+
+        /* 로딩 오버레이 */
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;
+        }
+        .loading-overlay.show { display: flex; }
+        .loading-box { background: white; padding: 2rem 3rem; border-radius: 12px; text-align: center; }
+        .loading-spinner {
+            width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
+            border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 탭 스타일 */
+        .tab-btn {
+            padding: 10px 20px; border: none; background: #e5e7eb; cursor: pointer;
+            border-radius: 8px 8px 0 0; font-weight: 500; transition: all 0.3s;
+        }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* 년월 칩 */
+        .ym-chip {
+            display: inline-flex; align-items: center; background: #dbeafe;
+            padding: 4px 10px; border-radius: 16px; margin: 2px; font-size: 0.875rem;
+        }
+        .ym-chip button { margin-left: 6px; color: #6b7280; cursor: pointer; border: none; background: none; }
+        .ym-chip button:hover { color: #dc2626; }
+
+        /* 데이터 테이블 */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .data-table th {
+            background: var(--primary-dark); color: white; padding: 8px; text-align: center;
+            position: sticky; top: 0; border: 1px solid #1a4fa3;
+        }
+        .data-table th.year-header {
+            background: var(--primary); border-bottom: 2px solid var(--primary-dark);
+        }
+        .data-table th.metric-header { background: var(--primary-dark); }
+        .data-table th.divider { border-left: 3px solid #0d3a8a; }
+        .data-table td { border: 1px solid #e5e7eb; padding: 8px; text-align: right; }
+        .data-table td:first-child { text-align: left; font-weight: 500; background: #f9fafb; }
+        .data-table td.divider { border-left: 3px solid #ccc; }
+        .data-table tr:nth-child(even) { background: #f9fafb; }
+        .data-table tr:hover { background: #e0f2fe; }
+        .data-table tr:first-child { background: #fef3c7; font-weight: bold; }
+        .positive { color: #2563eb; }
+        .negative { color: #dc2626; }
+
+        /* 차트 컨테이너 */
+        .chart-container { background: #f9fafb; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .chart-container .plotly-graph-div { width: 100% !important; }
+
+        /* 정렬 기능 */
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { background: #0d3a8a; }
+        .sort-icon { font-size: 0.75rem; margin-left: 4px; opacity: 0.5; }
+        .sortable.asc .sort-icon { opacity: 1; }
+        .sortable.asc .sort-icon::after { content: '▲'; }
+        .sortable.desc .sort-icon { opacity: 1; }
+        .sortable.desc .sort-icon::after { content: '▼'; }
+        .sortable:not(.asc):not(.desc) .sort-icon::after { content: '⇅'; }
+
+        /* 네비게이션 */
+        .main-nav { display: flex; gap: 0.5rem; }
+        .nav-link-custom {
+            color: rgba(255,255,255,0.8); text-decoration: none; padding: 0.4rem 0.8rem;
+            border-radius: 4px; font-size: 0.9rem; transition: all 0.3s;
+        }
+        .nav-link-custom:hover { background: rgba(255,255,255,0.2); color: white; }
+        .nav-link-custom.active { background: var(--accent); color: white; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <div id="loadingText">데이터를 불러오는 중...</div>
+        </div>
+    </div>
+
+    <!-- 헤더 -->
+    <header class="header text-white py-3 px-4 shadow-lg">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <h1 class="h5 mb-0">인구 집계표 대시보드</h1>
+            <nav class="main-nav">
+                {% for item in menu_items %}
+                <a href="{{ item.url }}" class="nav-link-custom {% if item.url == current_url %}active{% endif %}">
+                    {{ item.name }}
+                </a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="container-fluid p-4">
+        <!-- 필터 섹션 -->
+        <div class="card p-4 mb-4">
+            <h5 class="mb-3 text-dark">조회 조건</h5>
+            <div class="row g-3 align-items-end">
+                <!-- 기준년월 선택 -->
+                <div class="col-md-3">
+                    <label class="form-label small fw-medium">기준년월 추가</label>
+                    <div class="input-group">
+                        <select id="baseYmSelect" class="form-select form-select-sm">
+                            <option value="">선택...</option>
+                            {% for ym in filters.base_ym_list %}
+                            <option value="{{ ym }}">{{ ym[:4] }}년 {{ ym[4:] }}월</option>
+                            {% endfor %}
+                        </select>
+                        <button onclick="addYm()" class="btn btn-primary-custom btn-sm">+</button>
+                    </div>
+                    <div id="selectedYmList" class="mt-2 min-h-[40px]">
+                        {% for ym in selected_ym_list %}
+                        <span class="ym-chip">{{ ym[:4] }}.{{ ym[4:] }}<button onclick="removeYm('{{ ym }}')">&times;</button></span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 연령구분 -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-medium">연령구분</label>
+                    <select id="ageCategorySelect" class="form-select form-select-sm">
+                        {% for cat in filters.age_categories %}
+                        <option value="{{ cat.category }}" {% if cat.category == selected_age_category %}selected{% endif %}>{{ cat.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 집계단위 (권역별/시도별/시군구별) -->
+                <div class="col-md-2">
+                    <label class="form-label small fw-medium">집계단위</label>
+                    <select id="aggregateSelect" class="form-select form-select-sm" onchange="onAggregateChange()">
+                        <option value="region" {% if aggregate_type == 'region' %}selected{% endif %}>권역별</option>
+                        <option value="sido" {% if aggregate_type == 'sido' %}selected{% endif %}>시도별</option>
+                        <option value="sigungu" {% if aggregate_type == 'sigungu' %}selected{% endif %}>시군구별</option>
+                    </select>
+                </div>
+
+                <!-- 시도 선택 (시군구별일 때 표시) -->
+                <div class="col-md-2" id="sidoSelectDiv" style="display: {% if aggregate_type == 'sigungu' %}block{% else %}none{% endif %};">
+                    <label class="form-label small fw-medium">시도</label>
+                    <select id="sidoSelect" class="form-select form-select-sm">
+                        <option value="">선택...</option>
+                        {% for sido in filters.sido_list %}
+                        <option value="{{ sido }}" {% if sido == selected_sido %}selected{% endif %}>{{ sido }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-check mt-1" id="includeSubSigunguDiv">
+                        <input type="checkbox" class="form-check-input" id="includeSubSigungu" {% if include_sub_sigungu %}checked{% endif %}>
+                        <label class="form-check-label small" for="includeSubSigungu">하위 시군구 포함</label>
+                    </div>
+                </div>
+
+                <!-- 버튼 -->
+                <div class="col-md-3 d-flex gap-2">
+                    <button onclick="loadAllData()" class="btn btn-primary-custom">조회</button>
+                    <button onclick="exportData()" class="btn btn-success-custom">내보내기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="mb-0 d-flex flex-wrap">
+            <button class="tab-btn {% if active_tab == 'region' %}active{% endif %}" onclick="showTab('region')">지역별 인구</button>
+            <button class="tab-btn {% if active_tab == 'age' %}active{% endif %}" onclick="showTab('age')">연령별 인구</button>
+            {% for tab in indicator_tabs %}
+            <button class="tab-btn {% if active_tab == tab.id %}active{% endif %}" onclick="showTab('{{ tab.id }}')">{{ tab.name }}</button>
+            {% endfor %}
+        </div>
+
+        <!-- 탭 컨텐츠 -->
+        <div class="card">
+            <!-- 지역별 탭 -->
+            <div id="tab-region" class="tab-content {% if active_tab == 'region' %}active{% endif %} p-4">
+                <h5 class="mb-4">{{ '권역별' if aggregate_type == 'region' else ('시도별' if aggregate_type == 'sido' else '시군구별') }} 인구 현황</h5>
+                {% if region_chart_img %}
+                <div class="chart-container text-center">
+                    <img src="data:image/png;base64,{{ region_chart_img }}" alt="지역별 인구 차트" style="max-width: 100%; height: auto;">
+                </div>
+                {% endif %}
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    {{ region_table_html|safe if region_table_html else '<p class="text-muted">데이터가 없습니다.</p>' }}
+                </div>
+            </div>
+
+            <!-- 연령별 탭 -->
+            <div id="tab-age" class="tab-content {% if active_tab == 'age' %}active{% endif %} p-4">
+                <h5 class="mb-2">연령별 인구 현황 (전국)</h5>
+                <p class="text-muted small mb-3">{{ age_data.category_name if age_data else '' }}</p>
+                {% if age_chart_img %}
+                <div class="chart-container text-center">
+                    <img src="data:image/png;base64,{{ age_chart_img }}" alt="연령별 인구 차트" style="max-width: 100%; height: auto;">
+                </div>
+                {% endif %}
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    {{ age_table_html|safe if age_table_html else '<p class="text-muted">데이터가 없습니다.</p>' }}
+                </div>
+
+                <!-- 지역별 연령 인구 (subplot) -->
+                {% if age_by_region_chart_img %}
+                <hr class="my-4">
+                <h5 class="mb-2">지역별 연령 인구 비교</h5>
+                <p class="text-muted small mb-3">선택한 집계 단위({{ '권역별' if aggregate_type == 'region' else '시도별' }})로 연령별 인구를 비교합니다.</p>
+                <div class="chart-container text-center">
+                    <img src="data:image/png;base64,{{ age_by_region_chart_img }}" alt="지역별 연령 인구 차트" style="max-width: 100%; height: auto;">
+                </div>
+                {% endif %}
+
+                <!-- 지역별 연령 인구 테이블 (접이식) -->
+                {% if age_by_region_table_html %}
+                <hr class="my-4">
+                <h5 class="mb-3">지역별 연령 인구 상세</h5>
+                {{ age_by_region_table_html|safe }}
+                {% endif %}
+            </div>
+
+            <!-- 동적 지표 탭 (code_indicator 기반) -->
+            {% for tab in indicator_tabs %}
+            <div id="tab-{{ tab.id }}" class="tab-content {% if active_tab == tab.id %}active{% endif %} p-4">
+                <h5 class="mb-2">{{ tab.name }}</h5>
+                {% if tab.description %}
+                <p class="text-muted small mb-3" style="background: #f0f9ff; padding: 8px 12px; border-radius: 4px; border-left: 3px solid #1D64F2;">
+                    <strong>산식:</strong> {{ tab.description }}
+                </p>
+                {% endif %}
+                {% if tab.chart_img %}
+                <div class="chart-container text-center">
+                    <img src="data:image/png;base64,{{ tab.chart_img }}" alt="{{ tab.name }} 차트" style="max-width: 100%; height: auto;">
+                </div>
+                {% endif %}
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    {{ tab.table_html|safe if tab.table_html else '<p class="text-muted">데이터가 없습니다.</p>' }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <script>
+        let selectedYmList = {{ selected_ym_list|tojson|safe }};
+
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text || '처리 중...';
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function addYm() {
+            const ym = document.getElementById('baseYmSelect').value;
+            if (!ym) return;
+            if (selectedYmList.includes(ym)) {
+                alert('이미 추가된 년월입니다.');
+                return;
+            }
+            selectedYmList.push(ym);
+            selectedYmList.sort();
+            updateYmChips();
+        }
+
+        function removeYm(ym) {
+            selectedYmList = selectedYmList.filter(y => y !== ym);
+            updateYmChips();
+        }
+
+        function updateYmChips() {
+            const container = document.getElementById('selectedYmList');
+            container.innerHTML = selectedYmList.map(ym => `
+                <span class="ym-chip">
+                    ${ym.substr(0,4)}.${ym.substr(4,2)}
+                    <button onclick="removeYm('${ym}')">&times;</button>
+                </span>
+            `).join('');
+        }
+
+        function onAggregateChange() {
+            const aggregate = document.getElementById('aggregateSelect').value;
+            const sidoDiv = document.getElementById('sidoSelectDiv');
+
+            // 시군구별일 때만 시도 선택 표시
+            sidoDiv.style.display = (aggregate === 'sigungu') ? 'block' : 'none';
+        }
+
+        function loadAllData() {
+            if (selectedYmList.length === 0) {
+                alert('기준년월을 1개 이상 선택해주세요.');
+                return;
+            }
+            showLoading('데이터를 조회하는 중...');
+
+            const params = new URLSearchParams();
+            params.set('base_ym_list', selectedYmList.join(','));
+            params.set('age_category', document.getElementById('ageCategorySelect').value);
+            params.set('aggregate_type', document.getElementById('aggregateSelect').value);
+            params.set('sido', document.getElementById('sidoSelect')?.value || '');
+            params.set('include_sub_sigungu', document.getElementById('includeSubSigungu')?.checked ? '1' : '0');
+            params.set('active_tab', 'region');  // 조회시 지역별 인구 탭 선택
+
+            window.location.href = '?' + params.toString();
+        }
+
+        // ============================================================================
+        // [정렬 상태 관리] 현재 정렬된 컬럼과 방향을 저장
+        // - 내보내기 시 이 정보를 서버로 전달하여 정렬된 상태로 내보냄
+        // ============================================================================
+        let currentSortColumn = '';
+        let currentSortDirection = '';
+
+        function exportData() {
+            if (selectedYmList.length === 0) {
+                alert('기준년월을 1개 이상 선택해주세요.');
+                return;
+            }
+            showLoading('파일을 생성하는 중...');
+
+            const params = new URLSearchParams();
+            params.set('api_type', 'export');
+            params.set('base_ym_list', selectedYmList.join(','));
+            params.set('age_category', document.getElementById('ageCategorySelect').value);
+            params.set('aggregate_type', document.getElementById('aggregateSelect').value);
+            params.set('region', document.getElementById('regionSelect')?.value || '');
+            params.set('sido', document.getElementById('sidoSelect')?.value || '');
+            params.set('include_sub_sigungu', document.getElementById('includeSubSigungu')?.checked ? '1' : '0');
+
+            // [정렬 파라미터 전달] 화면에서 정렬한 상태를 내보내기에 반영
+            if (currentSortColumn) {
+                params.set('sort_column', currentSortColumn);
+                params.set('sort_direction', currentSortDirection);
+            }
+
+            fetch('?' + params.toString())
+                .then(res => res.json())
+                .then(result => {
+                    hideLoading();
+                    if (result.success && result.download_links) {
+                        showDownloadLinks(result.download_links);
+                    } else {
+                        alert('내보내기 실패: ' + (result.error || '알 수 없는 오류'));
+                    }
+                })
+                .catch(e => {
+                    hideLoading();
+                    alert('내보내기 중 오류가 발생했습니다.');
+                    console.error(e);
+                });
+        }
+
+        // 다운로드 링크 팝업 표시
+        function showDownloadLinks(links) {
+            // 기존 팝업 제거
+            const existingPopup = document.getElementById('downloadPopup');
+            if (existingPopup) existingPopup.remove();
+
+            // 팝업 생성
+            const popup = document.createElement('div');
+            popup.id = 'downloadPopup';
+            popup.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                background: white; padding: 25px; border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10000;
+                min-width: 320px; max-width: 450px;
+            `;
+
+            let linksHtml = links.map(link => `
+                <a href="${link.url}" class="download-link" style="
+                    display: flex; align-items: center; justify-content: space-between;
+                    padding: 12px 15px; margin: 8px 0; background: #f8f9fa;
+                    border-radius: 6px; text-decoration: none; color: #333;
+                    border: 1px solid #dee2e6; transition: all 0.2s;
+                " onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+                    <span style="font-weight: 500;">${link.name}</span>
+                    <span style="
+                        background: ${link.type === 'XLSX' ? '#217346' : link.type === 'HTML' ? '#e34c26' : '#333'};
+                        color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px;
+                    ">${link.type}</span>
+                </a>
+            `).join('');
+
+            popup.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h5 style="margin: 0; color: #333;">파일 다운로드</h5>
+                    <button onclick="document.getElementById('downloadPopup').remove()" style="
+                        background: none; border: none; font-size: 20px; cursor: pointer; color: #666;
+                    ">&times;</button>
+                </div>
+                <p style="color: #666; font-size: 13px; margin-bottom: 15px;">아래 링크를 클릭하여 파일을 다운로드하세요.</p>
+                ${linksHtml}
+            `;
+
+            // 배경 오버레이
+            const overlay = document.createElement('div');
+            overlay.id = 'downloadOverlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.4); z-index: 9999;
+            `;
+            overlay.onclick = () => {
+                popup.remove();
+                overlay.remove();
+            };
+
+            document.body.appendChild(overlay);
+            document.body.appendChild(popup);
+        }
+
+        // ============================================================================
+        // [테이블 정렬 기능] 클릭한 컬럼으로 테이블 정렬
+        // - 정렬 상태를 전역 변수에 저장하여 내보내기 시 활용
+        // ============================================================================
+        function initSortable() {
+            document.querySelectorAll('.sortable-table').forEach(table => {
+                table.querySelectorAll('th.sortable').forEach(th => {
+                    th.addEventListener('click', function() {
+                        // 두 번째 헤더 행의 인덱스 + 1 (첫 번째 컬럼은 rowspan으로 첫 행에 있음)
+                        const colIndex = Array.from(th.parentElement.children).indexOf(th) + 1;
+                        const tbody = table.querySelector('tbody');
+                        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+                        // 첫 번째 행(합계)은 제외
+                        const firstRow = rows.shift();
+
+                        // 현재 정렬 상태 확인
+                        const isAsc = th.classList.contains('asc');
+                        const isDesc = th.classList.contains('desc');
+
+                        // 모든 헤더의 정렬 클래스 제거
+                        table.querySelectorAll('th.sortable').forEach(h => {
+                            h.classList.remove('asc', 'desc');
+                        });
+
+                        // 정렬 방향 결정
+                        let sortDir = 'asc';
+                        if (isAsc) sortDir = 'desc';
+                        else if (isDesc) sortDir = 'none';
+
+                        if (sortDir !== 'none') {
+                            th.classList.add(sortDir);
+
+                            // [정렬 상태 저장] 내보내기 시 사용하기 위해 전역 변수에 저장
+                            currentSortColumn = th.dataset.col || '';
+                            currentSortDirection = sortDir;
+
+                            // 정렬
+                            rows.sort((a, b) => {
+                                const aCell = a.children[colIndex];
+                                const bCell = b.children[colIndex];
+                                let aVal = parseFloat(aCell?.dataset?.value || aCell?.textContent?.replace(/[,%]/g, '') || 0);
+                                let bVal = parseFloat(bCell?.dataset?.value || bCell?.textContent?.replace(/[,%]/g, '') || 0);
+
+                                if (isNaN(aVal)) aVal = aCell?.textContent || '';
+                                if (isNaN(bVal)) bVal = bCell?.textContent || '';
+
+                                if (typeof aVal === 'string') {
+                                    return sortDir === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                                }
+                                return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+                            });
+                        } else {
+                            // 정렬 해제 시 전역 변수 초기화
+                            currentSortColumn = '';
+                            currentSortDirection = '';
+                        }
+
+                        // 테이블 재구성
+                        tbody.innerHTML = '';
+                        tbody.appendChild(firstRow);
+                        rows.forEach(row => tbody.appendChild(row));
+                    });
+                });
+            });
+        }
+
+        // 페이지 로드 완료 시 로딩 숨김 및 정렬 기능 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            hideLoading();
+            initSortable();
+        });
+
+        // 지역별 연령 테이블 더보기 기능
+        function loadMoreRegions(startIndex, maxRegions) {
+            // 서버 재조회 없이 모든 지역 표시 (페이지 새로고침으로 구현)
+            const btn = document.getElementById('loadMoreRegionsBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = '로딩 중...';
+            }
+            const url = new URL(window.location.href);
+            url.searchParams.set('show_all_regions', '1');
+            window.location.href = url.toString();
+        }
+    </script>
+
+    <!-- Bootstrap JS (아코디언 동작에 필요) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

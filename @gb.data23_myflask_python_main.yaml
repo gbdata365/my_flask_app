@@ -1,0 +1,79 @@
+# ==========================================
+# Flask 애플리케이션 서비스
+# ==========================================
+name: my-flask-app11  # 서비스 이름
+app: python@3.12      # Python 3.12 런타임
+
+options:
+  ports: "5000"              # 외부 포트
+  start: python main_app.py  # 시작 명령어
+  healthz: /                 # 헬스체크 엔드포인트
+
+  env:
+    # ========================================
+    # PostgreSQL 연결 설정 (내부 서비스 간 통신)
+    # ========================================
+    # DATABASE_URL: PostgreSQL 연결 문자열 (db_config.py에서 우선 사용)
+    # 비밀번호의 특수문자는 URL 인코딩 필요: ! -> %21
+    - name: DATABASE_URL
+      value: postgresql://gbdo:rudtkdqnreh1%21@postgresql:5432/postgres
+
+    # 개별 PostgreSQL 환경변수 (내부 연결)
+    - name: POSTGRES_HOST
+      value: postgresql  # PostgreSQL 서비스명 (같은 프로젝트 내)
+    - name: POSTGRES_PORT
+      value: "5432"
+    - name: POSTGRES_DB
+      value: postgres
+    - name: POSTGRES_USER
+      value: gbdo
+    - name: POSTGRES_PASSWORD
+      value: rudtkdqnreh1!
+
+    # ========================================
+    # 외부 접속용 (로컬 개발 또는 외부 클라이언트)
+    # ========================================
+    - name: POSTGRES_HOST_EXTERNAL
+      value: svc.sel3.cloudtype.app
+    - name: POSTGRES_PORT_EXTERNAL
+      value: "32596"
+
+    # ========================================
+    # Flask 애플리케이션 설정
+    # ========================================
+    - name: FLASK_ENV
+      value: production
+    - name: SECRET_KEY
+      value: csv_dashboard_secret_key_2024_cloudtype
+    - name: SERVER_HOST
+      value: 0.0.0.0
+    - name: SERVER_PORT
+      value: "5000"
+    - name: LOG_LEVEL
+      value: INFO
+
+  buildenv: []  # 빌드 시점 환경변수 (필요시 추가)
+
+resources:
+  spot: false    # Spot 인스턴스 미사용
+  memory: 0.5    # 메모리 512MB
+
+context:
+  git:
+    url: https://github.com/gbdata365/my_flask_app.git
+    branch: main
+---
+name: postgresql
+app: postgresql@16
+options:
+  rootusername: gbdo
+  rootpassword: rudtkdqnreh1!
+resources:
+  spot: false
+  cpu: 0
+  memory: 0.52
+
+  disk: 1
+  replicas: 1
+context:
+  preset: postgresql

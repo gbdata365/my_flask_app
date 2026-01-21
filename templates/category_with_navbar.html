@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category_name }} - 데이터 분석 대시보드</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #1243A6;
+            --primary: #1D64F2;
+            --dark: #011C40;
+            --light: #F2EED8;
+            --accent: #F24822;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark);
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 헤더 (네비게이션 바) */
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: 2rem;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .nav-link.active {
+            background: var(--accent);
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-home {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: background 0.3s;
+        }
+
+        .btn-home:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        /* 로딩 오버레이 */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-overlay.show { display: flex; }
+        .loading-box {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text { font-size: 1.1rem; color: var(--dark); font-weight: 500; }
+
+        .content-area {
+            padding: 2rem;
+            background-color: white;
+            margin: 2rem auto;
+            max-width: 1200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 60vh;
+        }
+
+        .markdown-content {
+            line-height: 1.6;
+        }
+
+        .markdown-content h1 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content h2 {
+            color: var(--primary);
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content h3 {
+            color: var(--dark);
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .file-type-icon {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">페이지를 불러오는 중...</div>
+        </div>
+    </div>
+
+    <!-- 헤더 네비게이션 -->
+    <header class="header">
+        <div class="header-content">
+            <h1><a href="/{{ category_name }}" style="color: white; text-decoration: none;">{{ display_name if display_name else (category_name.split('_', 1)[1] if '_' in category_name and category_name[0].isdigit() else category_name) }}</a></h1>
+            <nav class="main-nav" id="main-nav">
+                {% for item in menu_items %}
+                <a href="{{ item.url }}" class="nav-link" data-url="{{ item.url }}" data-type="{{ item.type }}">
+                    {% if item.type == 'markdown' %}📄{% elif item.type == 'html' %}🌐{% else %}⚙️{% endif %}
+                    {{ item.name }}
+                </a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="container-fluid">
+        <div class="content-area">
+            <div class="markdown-content" id="main-content">
+                {% if content %}
+                    {{ content|safe }}
+                {% else %}
+                    <h1>환영합니다!</h1>
+                    <p>상단 메뉴에서 원하는 파일을 선택하세요.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            // 네비게이션 활성화 (현재 URL 기준)
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('#main-nav .nav-link');
+
+            navLinks.forEach(link => {
+                const linkUrl = link.getAttribute('data-url') || link.getAttribute('href');
+                if (currentPath === linkUrl || currentPath.startsWith(linkUrl + '/')) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // 페이지 이동 시 로딩 표시
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const targetPath = this.getAttribute('href');
+                    if (currentPath !== targetPath) {
+                        document.getElementById('loadingOverlay').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

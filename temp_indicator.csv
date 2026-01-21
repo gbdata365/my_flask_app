@@ -1,0 +1,16 @@
+﻿column_name,display_name,description
+elderly_ratio,고령화율,총인구 대비 고령인구(65세+) 비율
+youth_ratio,유소년비율,총인구 대비 유소년(0~14세) 비율
+working_ratio,생산가능인구비율,총인구 대비 생산가능인구(15~64세) 비율
+aging_index,고령화지수,유소년 100명당 고령인구 수
+youth_dependency,유소년부양비,생산가능인구 100명당 유소년 수
+elderly_dependency,노년부양비,생산가능인구 100명당 고령인구 수
+total_dependency,총부양비,생산가능인구 100명당 부양인구 수
+sex_ratio,성비,여자 100명당 남자 수
+super_elderly_ratio,초고령비율,총인구 대비 초고령(80세+) 비율
+late_elderly_ratio,후기고령비율,고령인구 중 후기고령(75세+) 비율
+young_adult_ratio,청년비율,총인구 대비 청년(19~34세) 비율
+extinction_index,소멸위험지수,20~39세 여성 / 65세+ (0.5 미만=소멸위험)
+potential_support,잠재부양비,15~64세 / 65세+ (노인 1명당 부양가능인구)
+teenager_ratio,청소년비율,총인구 대비 청소년(9~24세) 비율
+school_age_ratio,학령인구비율,총인구 대비 학령인구(6~21세) 비율

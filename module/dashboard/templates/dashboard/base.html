@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #1243A6;
+            --primary: #1D64F2;
+            --dark: #011C40;
+            --accent: #F24822;
+            --highlight-bg: #fee2e2;
+            --highlight-border: #dc2626;
+        }
+        body { background-color: #f3f4f6; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; }
+        .header { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
+        .card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-primary-custom { background-color: var(--primary); color: white; border: none; }
+        .btn-primary-custom:hover { background-color: var(--primary-dark); color: white; }
+        .btn-success-custom { background-color: #10b981; color: white; border: none; }
+
+        /* 로딩 */
+        .loading-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;
+        }
+        .loading-overlay.show { display: flex; }
+        .loading-spinner {
+            width: 50px; height: 50px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 탭 */
+        .tab-btn {
+            padding: 10px 20px; border: none; background: #e5e7eb; cursor: pointer;
+            border-radius: 8px 8px 0 0; font-weight: 500; transition: all 0.3s;
+        }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* 년월 칩 */
+        .ym-chip {
+            display: inline-flex; align-items: center; background: #dbeafe;
+            padding: 4px 10px; border-radius: 16px; margin: 2px; font-size: 0.875rem;
+        }
+        .ym-chip button { margin-left: 6px; cursor: pointer; border: none; background: none; }
+        .ym-chip button:hover { color: #dc2626; }
+
+        /* 차트 */
+        .chart-container { background: #f9fafb; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; }
+        .chart-container img { max-width: 100%; height: auto; }
+
+        /* 테이블 (TableGenerator에서 생성한 스타일과 호환) */
+        .table-responsive { max-height: 500px; overflow: auto; }
+
+        /* 네비게이션 */
+        .main-nav { display: flex; gap: 0.5rem; }
+        .nav-link-custom {
+            color: rgba(255,255,255,0.8); text-decoration: none; padding: 0.4rem 0.8rem;
+            border-radius: 4px; font-size: 0.9rem;
+        }
+        .nav-link-custom:hover { background: rgba(255,255,255,0.2); color: white; }
+        .nav-link-custom.active { background: var(--accent); color: white; }
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    <!-- 로딩 오버레이 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="loading-spinner mb-3"></div>
+            <div class="text-white" id="loadingText">처리 중...</div>
+        </div>
+    </div>
+
+    <!-- 헤더 -->
+    <header class="header text-white py-3 px-4 shadow-lg">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <h1 class="h5 mb-0">{{ title }}</h1>
+            {% if menu_items %}
+            <nav class="main-nav">
+                {% for item in menu_items %}
+                <a href="{{ item.url }}" class="nav-link-custom">{{ item.name }}</a>
+                {% endfor %}
+            </nav>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="container-fluid p-4">
+        {% block filters %}
+        <!-- 필터 섹션 (기본) -->
+        <div class="card p-4 mb-4">
+            <h5 class="mb-3">조회 조건</h5>
+            <div class="row g-3 align-items-end">
+                {% if filters.base_ym_list %}
+                <div class="col-md-3">
+                    <label class="form-label small">기준년월</label>
+                    <div class="input-group">
+                        <select id="baseYmSelect" class="form-select form-select-sm">
+                            <option value="">선택...</option>
+                            {% for ym in filters.base_ym_list %}
+                            <option value="{{ ym }}">{{ ym[:4] }}년 {{ ym[4:] }}월</option>
+                            {% endfor %}
+                        </select>
+                        <button onclick="addYm()" class="btn btn-primary-custom btn-sm">+</button>
+                    </div>
+                    <div id="selectedYmList" class="mt-2"></div>
+                </div>
+                {% endif %}
+
+                {% if filters.sido_list %}
+                <div class="col-md-2">
+                    <label class="form-label small">시도</label>
+                    <select id="sidoSelect" class="form-select form-select-sm">
+                        <option value="">전체</option>
+                        {% for sido in filters.sido_list %}
+                        <option value="{{ sido }}">{{ sido }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button onclick="loadData()" class="btn btn-primary-custom">조회</button>
+                    <button onclick="exportData()" class="btn btn-success-custom">내보내기</button>
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+
+        {% block tabs %}
+        <!-- 탭 (기본) -->
+        {% if tabs and tabs|length > 1 %}
+        <div class="mb-0 d-flex flex-wrap">
+            {% for tab in tabs %}
+            <button class="tab-btn {% if loop.first %}active{% endif %}" onclick="showTab('{{ tab.id }}')">
+                {{ tab.label }}
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endblock %}
+
+        {% block content %}
+        <!-- 메인 컨텐츠 (하위 템플릿에서 오버라이드) -->
+        <div class="card p-4">
+            {% for tab in tabs %}
+            <div id="tab-{{ tab.id }}" class="tab-content {% if loop.first %}active{% endif %}">
+                <h5 class="mb-4">{{ tab.label }}</h5>
+
+                {% if charts and charts[tab.id] %}
+                <div class="chart-container">
+                    <img src="data:image/png;base64,{{ charts[tab.id] }}" alt="{{ tab.label }} 차트">
+                </div>
+                {% endif %}
+
+                {% if tables and tables[tab.id] %}
+                <div class="table-responsive">
+                    {{ tables[tab.id]|safe }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endblock %}
+    </main>
+
+    <script>
+        let selectedYmList = {{ selected_ym_list|default([])|tojson|safe }};
+
+        function showLoading(text) {
+            document.getElementById('loadingText').textContent = text || '처리 중...';
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        function addYm() {
+            const ym = document.getElementById('baseYmSelect').value;
+            if (!ym || selectedYmList.includes(ym)) return;
+            selectedYmList.push(ym);
+            selectedYmList.sort();
+            updateYmChips();
+        }
+
+        function removeYm(ym) {
+            selectedYmList = selectedYmList.filter(y => y !== ym);
+            updateYmChips();
+        }
+
+        function updateYmChips() {
+            const container = document.getElementById('selectedYmList');
+            if (!container) return;
+            container.innerHTML = selectedYmList.map(ym => `
+                <span class="ym-chip">${ym.substr(0,4)}.${ym.substr(4,2)}
+                    <button onclick="removeYm('${ym}')">&times;</button>
+                </span>
+            `).join('');
+        }
+
+        function loadData() {
+            if (selectedYmList.length === 0) {
+                alert('기준년월을 선택해주세요.');
+                return;
+            }
+            showLoading('데이터 조회 중...');
+            const params = new URLSearchParams();
+            params.set('base_ym_list', selectedYmList.join(','));
+            const sido = document.getElementById('sidoSelect')?.value;
+            if (sido) params.set('sido', sido);
+            window.location.href = '?' + params.toString();
+        }
+
+        function exportData() {
+            if (selectedYmList.length === 0) {
+                alert('기준년월을 선택해주세요.');
+                return;
+            }
+            showLoading('파일 생성 중...');
+            const params = new URLSearchParams();
+            params.set('api_type', 'export');
+            params.set('base_ym_list', selectedYmList.join(','));
+            const sido = document.getElementById('sidoSelect')?.value;
+            if (sido) params.set('sido', sido);
+
+            fetch('?' + params.toString())
+                .then(res => res.json())
+                .then(result => {
+                    hideLoading();
+                    if (result.success) {
+                        alert('내보내기 완료!\n\n' + result.files.join('\n'));
+                    } else {
+                        alert('오류: ' + (result.error || '알 수 없는 오류'));
+                    }
+                })
+                .catch(e => {
+                    hideLoading();
+                    alert('오류 발생');
+                });
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateYmChips();
+            hideLoading();
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

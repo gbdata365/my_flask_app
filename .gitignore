@@ -1,0 +1,51 @@
+# 환경변수 파일 (민감한 정보 포함)
+# 주의: .env 파일을 GitHub에 올리려면 아래 줄을 주석처리하세요
+# 단, Private 저장소에서만 사용하고, 민감정보 노출에 주의하세요
+# .env  ← 주석처리하여 .env 파일이 GitHub에 업로드되도록 함
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Claude Code
+.claude/settings.local.json
+**/.claude/settings.local.json
+
+# Windows 예약어
+nul
+
+# 로그 파일
+*.log
+
+# 데이터베이스
+*.db
+*.sqlite
+*.sqlite3
+
+# 이미지 파일 (스크린샷)
+*.jpg
+*.jpeg
+*.png
+*.gif
+
+# Excel 임시 파일
+~$*.xlsx
+~$*.xls
+
+# 임시 파일 폴더
+temp/
+guide/
