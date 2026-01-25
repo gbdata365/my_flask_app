@@ -27,6 +27,12 @@ options:
       value: "5000"
     - name: LOG_LEVEL
       value: INFO
+    - name: ANTHROPIC_API_KEY
+      value: sk-ant-api03-AAUE3TDLUV7GeITyQOLwqctC5rYbqRDd1jX2KIGrv_KbbQz5xL_YqN
+    - name: UPSTAGE_API_KEY
+      value: up_ARCnFjBhIBT5dWBnJ94sXGnUCvmVN   
+    - name: OPENAI_API_KEY
+      value: sk-proj-SkWU17Zx3m8q5YVw1cUxah85cyY6E1ABqf06oUDC1g2xABQ1rKREjGitmC_Qax          
   buildenv: []
 resources:
   spot: false

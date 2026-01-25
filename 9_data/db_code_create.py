@@ -18,7 +18,7 @@ import os
 # 상위 디렉토리를 Python 경로에 추가 (module 폴더 접근용)
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
-from module.db_config import get_postgres_config
+from module.db import get_postgres_config
 
 
 class PostgresDBManager:

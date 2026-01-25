@@ -204,8 +204,8 @@ def register_category_routes(app, category_id):
         sys.path.insert(0, str(category_base / "routes"))
 
     # Blueprint 임포트 및 등록 (_로 시작하는 API 파일들)
-    # 01_population의 경우에만 특정 Blueprint 등록
-    if category_id == "01_population":
+    # 01_인구및가구현황의 경우에만 특정 Blueprint 등록
+    if category_id == "01_인구및가구현황":
         try:
             from routes._population_api import population_bp
             from routes._age_api import age_bp
@@ -213,6 +213,22 @@ def register_category_routes(app, category_id):
             app.register_blueprint(age_bp, url_prefix=f"/{category_id}")
         except ImportError:
             pass  # Blueprint가 없으면 무시
+
+    # 9_data의 경우 db_viewer, db_edit Blueprint 등록
+    if category_id == "9_data":
+        try:
+            from db_viewer import db_viewer_bp
+            app.register_blueprint(db_viewer_bp, url_prefix=f"/{category_id}")
+            print(f"  db_viewer_bp 등록 완료")
+        except Exception as e:
+            print(f"  db_viewer_bp 등록 실패: {e}")
+
+        try:
+            from db_edit import db_edit_bp
+            app.register_blueprint(db_edit_bp, url_prefix=f"/{category_id}")
+            print(f"  db_edit_bp 등록 완료")
+        except Exception as e:
+            print(f"  db_edit_bp 등록 실패: {e}")
 
     # 동적 엔드포인트 이름 생성 (category_id의 특수문자 제거)
     endpoint_prefix = category_id.replace('-', '_').replace(' ', '_')

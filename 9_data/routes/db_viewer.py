@@ -5,16 +5,19 @@ PostgreSQL 데이터베이스 뷰어 (웹 버전)
 - 테이블 데이터 조회
 """
 
-from flask import render_template_string, request, jsonify
+from flask import render_template_string, request, jsonify, Blueprint
 import sys
 from pathlib import Path
 
 # 상위 디렉토리를 Python 경로에 추가
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from module.db_config import get_postgres_config
+from module.db import get_postgres_config
 import psycopg2
 from psycopg2 import sql
+
+# Blueprint 생성
+db_viewer_bp = Blueprint('db_viewer', __name__)
 
 
 class PostgresWebViewer:
@@ -522,6 +525,44 @@ HTML_TEMPLATE = """
 </body>
 </html>
 """
+
+
+# =============================================================================
+# API 엔드포인트 (Blueprint)
+# =============================================================================
+
+@db_viewer_bp.route('/api/tables')
+def api_tables():
+    """테이블 목록 API"""
+    try:
+        database = request.args.get('database')
+        if not database:
+            return jsonify({'success': False, 'error': '데이터베이스를 선택하세요'})
+
+        viewer = PostgresWebViewer()
+        tables = viewer.get_tables(database)
+        return jsonify({'success': True, 'tables': tables})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@db_viewer_bp.route('/api/data')
+def api_data():
+    """테이블 데이터 API"""
+    try:
+        database = request.args.get('database')
+        table = request.args.get('table')
+
+        if not database or not table:
+            return jsonify({'success': False, 'error': '데이터베이스와 테이블을 선택하세요'})
+
+        viewer = PostgresWebViewer()
+        data = viewer.get_table_data(database, table)
+        return jsonify({'success': True, 'data': data})
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 
 def render():

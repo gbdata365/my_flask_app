@@ -49,3 +49,5 @@ nul
 # 임시 파일 폴더
 temp/
 guide/
+.env
+module/.env

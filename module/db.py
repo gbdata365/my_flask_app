@@ -70,6 +70,34 @@ for _env_path in _env_paths:
         break
 
 
+def get_postgres_config(database: str = None) -> dict:
+    """
+    PostgreSQL 접속 설정을 딕셔너리로 반환합니다.
+
+    환경 변수에서 접속 정보를 읽어 psycopg2.connect()에 전달할 수 있는
+    딕셔너리를 반환합니다.
+
+    Args:
+        database (str, optional): 연결할 데이터베이스 이름.
+            None이면 POSTGRES_DB 환경 변수 사용.
+
+    Returns:
+        dict: PostgreSQL 접속 설정 딕셔너리
+            {'host': ..., 'port': ..., 'database': ..., 'user': ..., 'password': ...}
+
+    Examples:
+        >>> config = get_postgres_config()
+        >>> conn = psycopg2.connect(**config)
+    """
+    return {
+        'host': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'port': os.environ.get('POSTGRES_PORT', '5432'),
+        'database': database or os.environ.get('POSTGRES_DB', 'postgres'),
+        'user': os.environ.get('POSTGRES_USER', 'postgres'),
+        'password': os.environ.get('POSTGRES_PASSWORD', '')
+    }
+
+
 def get_db_connection(database: str = None):
     """
     PostgreSQL 데이터베이스 연결을 생성합니다.
